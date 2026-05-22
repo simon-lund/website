@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Now" description="What I'm currently focused on.">
+	<section class="max-w-2xl mx-auto px-4 py-16">
+		<h1 class="text-4xl font-bold mb-4" style="font-family: var(--font-heading);">Now</h1>
+		<p class="text-stone mb-12 text-sm">Last updated: May 2026</p>
+
+		<div class="space-y-8 text-ink-light leading-relaxed">
+			<div>
+				<h2 class="text-xl font-semibold text-ink mb-2" style="font-family: var(--font-heading);">Building</h2>
+				<p>
+					Working on AI-powered developer tools and exploring how to make
+					language models more reliable in production environments.
+				</p>
+			</div>
+
+			<div>
+				<h2 class="text-xl font-semibold text-ink mb-2" style="font-family: var(--font-heading);">Thinking about</h2>
+				<p>
+					The gap between AI capability and AI trustworthiness. How we can build
+					systems that are both powerful and predictable.
+				</p>
+			</div>
+
+			<div>
+				<h2 class="text-xl font-semibold text-ink mb-2" style="font-family: var(--font-heading);">Reading</h2>
+				<p>
+					Update this section with what you're currently reading.
+				</p>
+			</div>
+		</div>
+
+		<div class="mt-16 pt-8 border-t border-stone-light/30">
+			<p class="text-sm text-stone">
+				This is a <a href="https://nownownow.com/about" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2">now page</a>.
+				It's a snapshot of what I'm focused on at this point in my life.
+			</p>
+		</div>
+	</section>
+</BaseLayout>

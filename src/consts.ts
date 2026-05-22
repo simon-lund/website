@@ -1,5 +1,14 @@
-// Place any global data in this file.
-// You can import this data from anywhere in your site by using the `import` keyword.
+export const SITE_TITLE = 'Simon Lund';
+export const SITE_DESCRIPTION =
+	'Making AI productive and secure. Building tools that augment human capability.';
 
-export const SITE_TITLE = 'Astro Blog';
-export const SITE_DESCRIPTION = 'Welcome to my website!';
+export const NAV_LINKS = [
+	{ label: 'Home', href: '/' },
+	{ label: 'Blog', href: '/blog' },
+	{ label: 'Now', href: '/now' },
+] as const;
+
+export const SOCIAL_LINKS = {
+	bluesky: import.meta.env.PUBLIC_BLUESKY_URL ?? 'https://bsky.app',
+	github: import.meta.env.PUBLIC_GITHUB_URL ?? 'https://github.com',
+} as const;
