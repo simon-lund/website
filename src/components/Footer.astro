@@ -3,8 +3,12 @@ import { SOCIAL_LINKS } from '../consts';
 ---
 
 <footer class="mt-24">
-	<div class="max-w-2xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-stone">
-		<p class="text-sm">&copy; {new Date().getFullYear()} Simon Lund</p>
+	<div class="max-w-2xl mx-auto px-4 py-8 flex flex-col items-center gap-6 text-sm text-stone">
+		<nav class="flex items-center gap-6">
+			<a href="/blog" class="hover:text-ink transition-colors">Writing</a>
+			<a href="/links" class="hover:text-ink transition-colors">Links</a>
+			<a href="/now" class="hover:text-ink transition-colors">Now</a>
+		</nav>
 		<div class="flex items-center gap-2">
 			<a href={`mailto:${SOCIAL_LINKS.email}`} class="p-2.5 hover:text-ink transition-colors" aria-label="Email">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -28,5 +32,6 @@ import { SOCIAL_LINKS } from '../consts';
 				</svg>
 			</a>
 		</div>
+		<p>&copy; {new Date().getFullYear()} Simon Lund</p>
 	</div>
 </footer>

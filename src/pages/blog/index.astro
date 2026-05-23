@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import LinkCard from '../../components/LinkCard.astro';
+import FilterableList from '../../components/FilterableList.svelte';
 import { getBlogUrl } from '../../lib/blog';
 
 const posts = (await getCollection('blog')).sort(
@@ -11,6 +12,8 @@ const posts = (await getCollection('blog')).sort(
 function formatDate(date: Date): string {
 	return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 }
+
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 ---
 
 <BaseLayout title="Blog" description="Thoughts on AI, web development, and building useful things.">
@@ -18,15 +21,19 @@ function formatDate(date: Date): string {
 		<h1 class="text-2xl sm:text-3xl font-bold mb-4" style="font-family: var(--font-heading);">Writing</h1>
 		<p class="text-ink-light mb-8">Thoughts on AI, design, and building things that work.</p>
 
-		<div class="space-y-6">
-			{posts.map((post) => (
-				<LinkCard
-					href={getBlogUrl(post.id, post.data.title)}
-					title={post.data.title}
-					tag="Post"
-					date={formatDate(post.data.pubDate)}
-				/>
-			))}
-		</div>
+		<FilterableList client:load items={posts.map(p => ({ tags: p.data.tags ?? [] }))} tags={allTags}>
+			<div class="space-y-6">
+				{posts.map((post) => (
+					<LinkCard
+						href={getBlogUrl(post.id, post.data.title)}
+						title={post.data.title}
+						description={post.data.description}
+						tag={(post.data.tags ?? [])[0]}
+						date={formatDate(post.data.pubDate)}
+						tags={post.data.tags}
+					/>
+				))}
+			</div>
+		</FilterableList>
 	</section>
 </BaseLayout>

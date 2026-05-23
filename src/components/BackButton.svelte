@@ -2,7 +2,8 @@
 	import { ArrowLeft } from '@lucide/svelte';
 
 	function goBack() {
-		if (window.history.length > 1) {
+		const referrer = document.referrer;
+		if (referrer && new URL(referrer).origin === window.location.origin) {
 			window.history.back();
 		} else {
 			window.location.href = '/blog';

@@ -173,7 +173,10 @@
 
 		<div class="w-px h-5 bg-stone-light/50 mx-0.5"></div>
 
-		<ThemeToggle />
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div onmouseenter={() => moveIndicator(null)}>
+			<ThemeToggle />
+		</div>
 	</div>
 </nav>
 
