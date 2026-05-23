@@ -33,7 +33,6 @@ jobs:
           PUBLIC_BLUESKY_URL: ${{ vars.PUBLIC_BLUESKY_URL }}
           PUBLIC_GITHUB_URL: ${{ vars.PUBLIC_GITHUB_URL }}
           PUBLIC_LINKEDIN_URL: ${{ vars.PUBLIC_LINKEDIN_URL }}
-          PUBLIC_EMAIL: ${{ vars.PUBLIC_EMAIL }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
