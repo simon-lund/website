@@ -166,17 +166,6 @@
 
 /* Page transitions */
 
-.card-hover {
-	padding: 1rem 1.25rem;
-	margin: -1rem -1.25rem;
-	border-radius: 0.75rem;
-	transition: background-color 0.2s ease;
-}
-
-.card-hover:hover {
-	background-color: var(--color-cream-dark);
-}
-
 .sr-only {
 	position: absolute;
 	width: 1px;
