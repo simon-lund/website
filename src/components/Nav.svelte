@@ -20,6 +20,7 @@
 	let indicatorEl: HTMLDivElement | undefined = $state();
 	let navContainerEl: HTMLDivElement | undefined = $state();
 	let activePath = $state(currentPath);
+	let navBgPath = $state(currentPath);
 	let mobileOpen = $state(false);
 
 	function getActiveIndex(path: string): number {
@@ -123,6 +124,10 @@
 			closeMobile();
 		});
 
+		document.addEventListener('astro:after-swap', () => {
+			navBgPath = window.location.pathname;
+		});
+
 		return () => {
 			window.removeEventListener('scroll', updateScrollStyles);
 		};
@@ -133,8 +138,8 @@
 <nav class="hidden md:flex justify-center py-3">
 	<div
 		bind:this={navContainerEl}
-		class="relative flex items-center gap-1 rounded-xl px-1.5 py-1.5 {activePath === '/' ? 'bg-cream-dark' : 'bg-cream'}"
-		style="border: 0.5px solid transparent;"
+		class="relative flex items-center gap-1 rounded-xl px-1.5 py-1.5"
+		style="background-color: var(--color-{navBgPath === '/' ? 'cream-dark' : 'cream'}); transition: background-color 0.3s ease; border: 0.5px solid transparent;"
 		role="navigation"
 		onmouseleave={handleMouseLeave}
 	>
@@ -144,7 +149,9 @@
 			style="opacity: 0; will-change: transform;"
 		></div>
 
-		<a href="/" class="relative z-10 px-3 py-1.5 text-sm font-semibold text-ink cursor-pointer">
+		<a href="/" class="relative z-10 px-3 py-1.5 text-sm font-semibold text-ink cursor-pointer"
+			onmouseenter={() => moveIndicator(null)}
+		>
 			Simon Lund
 		</a>
 
