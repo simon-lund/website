@@ -19,14 +19,9 @@
 {/snippet}
 
 <div class="relative max-w-5xl mx-auto">
-	<!-- Mobile: portrait as watermark background, text on top -->
-	<div class="md:hidden relative">
-		<div class="absolute inset-0 flex justify-center items-center opacity-15 pointer-events-none overflow-hidden">
-			<AsciiPortrait />
-		</div>
-		<div class="relative z-10 px-2">
-			{@render heroText()}
-		</div>
+	<!-- Mobile: text only -->
+	<div class="md:hidden px-2">
+		{@render heroText()}
 	</div>
 
 	<!-- Desktop: two-column layout -->
