@@ -1,22 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import gsap from 'gsap';
 	import AsciiPortrait from './AsciiPortrait.svelte';
-
-	let textEls: HTMLElement[] = $state([]);
-
-	onMount(() => {
-		for (const el of textEls) {
-			gsap.set(el, { opacity: 0, y: 8 });
-		}
-		gsap.to(textEls, {
-			opacity: 1,
-			y: 0,
-			duration: 0.8,
-			delay: 0.4,
-			ease: 'power2.out',
-		});
-	});
 </script>
 
 {#snippet heroText()}
@@ -41,7 +24,7 @@
 		<div class="absolute inset-0 flex justify-center items-center opacity-10 pointer-events-none overflow-hidden">
 			<AsciiPortrait />
 		</div>
-		<div class="relative z-10 px-2" bind:this={textEls[0]}>
+		<div class="relative z-10 px-2">
 			{@render heroText()}
 		</div>
 	</div>
@@ -51,7 +34,7 @@
 		<div class="flex justify-end">
 			<AsciiPortrait />
 		</div>
-		<div bind:this={textEls[1]}>
+		<div>
 			{@render heroText()}
 		</div>
 	</div>
