@@ -1,7 +1,18 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroText from '../components/HeroText.svelte';
+import LinkCard from '../components/LinkCard.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { getBlogUrl } from '../lib/blog';
+
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 3);
+
+function formatDate(date: Date): string {
+	return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+}
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
@@ -23,4 +34,26 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		</ul>
 	</section>
 
+	{posts.length > 0 && (
+		<section class="max-w-2xl mx-auto px-4 pb-16 pt-8">
+			<h2 class="text-3xl sm:text-4xl font-bold mb-4" style="font-family: var(--font-heading);">Recent writing</h2>
+
+			<div class="space-y-6">
+				{posts.map((post) => (
+					<LinkCard
+						href={getBlogUrl(post.id, post.data.title)}
+						title={post.data.title}
+						description={post.data.description}
+						tag={(post.data.tags ?? [])[0]}
+						date={formatDate(post.data.pubDate)}
+						tags={post.data.tags}
+					/>
+				))}
+			</div>
+
+			<div class="mt-6">
+				<a href="/blog" class="text-sm font-medium hover:text-accent-hover transition-colors">See all</a>
+			</div>
+		</section>
+	)}
 </BaseLayout>
