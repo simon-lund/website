@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroText from '../components/HeroText.svelte';
-import LinkCard from '../components/LinkCard.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 ---
 
@@ -24,16 +23,4 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		</ul>
 	</section>
 
-	<section class="max-w-2xl mx-auto px-4 pb-16 pt-8">
-		<h2 class="text-3xl sm:text-4xl font-bold mb-4" style="font-family: var(--font-heading);">Recent writing</h2>
-
-		<div class="space-y-6">
-			<LinkCard href="#" title="Post Title" tag="Post" date="2026" />
-			<LinkCard href="#" title="Another Post" tag="Post" date="2025" />
-		</div>
-
-		<div class="mt-6">
-			<a href="/blog" class="text-sm font-medium hover:text-accent-hover transition-colors">See all</a>
-		</div>
-	</section>
 </BaseLayout>

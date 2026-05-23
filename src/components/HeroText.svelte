@@ -10,8 +10,8 @@
 		Reimagining software with intelligence at its heart.
 	</p>
 	<p class="text-lg text-ink-light leading-relaxed mb-4">
-		Most AI products today are <a href="https://koomen.dev/essays/horseless-carriages/" target="_blank" rel="noopener noreferrer">horseless carriages</a> —
-		old interfaces with AI tacked on, not reimagined around it.
+		Most AI products today are <a href="https://koomen.dev/essays/horseless-carriages/" target="_blank" rel="noopener noreferrer">horseless carriages</a>.
+		Old interfaces with AI tacked on, not reimagined around it.
 	</p>
 	<p class="text-lg text-ink-light leading-relaxed">
 		I'm working on what comes after.

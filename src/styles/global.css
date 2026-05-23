@@ -90,8 +90,9 @@
 	& li { margin-bottom: 0.375em; }
 
 	& blockquote {
-		border-left: 3px solid var(--color-accent);
-		padding-left: 1.25em;
+		background-color: var(--color-accent-light);
+		padding: 1em 1.25em;
+		border-radius: 0.5rem;
 		margin: 1.5em 0;
 		color: var(--color-ink-light);
 		font-style: italic;

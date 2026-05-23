@@ -200,7 +200,7 @@
 
 <!-- Mobile overlay -->
 {#if mobileOpen}
-	<div class="fixed inset-0 z-40 bg-cream flex flex-col md:hidden">
+	<div class="fixed inset-0 z-40 flex flex-col md:hidden" style="background-color: var(--color-{navBgPath === '/' ? 'cream-dark' : 'cream'});">
 		<div class="flex items-center justify-between px-4 py-3">
 			<a href="/" onclick={closeMobile} class="text-sm font-semibold text-ink cursor-pointer">
 				Simon Lund
