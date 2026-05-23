@@ -170,14 +170,11 @@
 	padding: 1rem 1.25rem;
 	margin: -1rem -1.25rem;
 	border-radius: 0.75rem;
-	border: 0.5px solid transparent;
-	transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+	transition: background-color 0.2s ease;
 }
 
 .card-hover:hover {
-	transform: translateY(-2px) rotate(-0.3deg);
 	background-color: var(--color-cream-dark);
-	border-color: color-mix(in srgb, var(--color-ink) 8%, transparent);
 }
 
 .sr-only {

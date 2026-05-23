@@ -1,35 +1,32 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
+import LinkCard from '../../components/LinkCard.astro';
 import { getBlogUrl } from '../../lib/blog';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
+
+function formatDate(date: Date): string {
+	return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+}
 ---
 
 <BaseLayout title="Blog" description="Thoughts on AI, web development, and building useful things.">
 	<section class="max-w-2xl mx-auto px-4 py-16">
-		<h1 class="text-4xl font-bold mb-12" style="font-family: var(--font-heading);">Writing</h1>
+		<h1 class="text-2xl sm:text-3xl font-bold mb-4" style="font-family: var(--font-heading);">Writing</h1>
+		<p class="text-ink-light mb-8">Thoughts on AI, design, and building things that work.</p>
 
-		<ul class="space-y-10">
+		<div class="space-y-6">
 			{posts.map((post) => (
-				<li>
-					<a href={getBlogUrl(post.id, post.data.title)} class="group block card-hover">
-						<p class="text-sm text-stone mb-1">
-							<FormattedDate date={post.data.pubDate} />
-						</p>
-						<h2
-							class="text-xl font-semibold group-hover:text-accent transition-colors duration-200"
-							style="font-family: var(--font-heading);"
-						>
-							{post.data.title}
-						</h2>
-						<p class="text-ink-light mt-1">{post.data.description}</p>
-					</a>
-				</li>
+				<LinkCard
+					href={getBlogUrl(post.id, post.data.title)}
+					title={post.data.title}
+					tag="Post"
+					date={formatDate(post.data.pubDate)}
+				/>
 			))}
-		</ul>
+		</div>
 	</section>
 </BaseLayout>

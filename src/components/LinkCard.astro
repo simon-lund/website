@@ -1,0 +1,41 @@
+---
+import GenerativePattern from './GenerativePattern.svelte';
+
+interface Props {
+	href: string;
+	title: string;
+	external?: boolean;
+	tag?: string;
+	date?: string;
+	image?: string;
+}
+
+const { href, title, external = false, tag, date, image } = Astro.props;
+---
+
+<a
+	href={href}
+	target={external ? '_blank' : undefined}
+	rel={external ? 'noopener noreferrer' : undefined}
+	class="group block cursor-pointer"
+>
+	<div class="relative overflow-hidden rounded-xl">
+		{image ? (
+			<img src={image} alt="" class="w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" style="aspect-ratio: 3/1;" />
+		) : (
+			<div class="transition-transform duration-300 group-hover:scale-[1.02]">
+				<GenerativePattern client:visible seed={title} />
+			</div>
+		)}
+		<div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+		<div class="absolute bottom-0 left-0 right-0 p-4">
+			<p class="font-semibold text-white leading-snug mb-2">{title}</p>
+			{(tag || date) && (
+				<div class="flex items-center gap-1.5">
+					{tag && <span class="text-xs uppercase tracking-wider text-white/90 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-md">{tag}</span>}
+					{date && <span class="text-xs text-white/90 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-md">{date}</span>}
+				</div>
+			)}
+		</div>
+	</div>
+</a>
