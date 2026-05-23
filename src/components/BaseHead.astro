@@ -22,11 +22,14 @@ const pageTitle = title === SITE_TITLE ? title : `${title} | ${SITE_TITLE}`;
 	(function() {
 		function applyTheme() {
 			const saved = localStorage.getItem('theme');
-			if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+			const isDark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+			if (isDark) {
 				document.documentElement.classList.add('dark');
 			} else {
 				document.documentElement.classList.remove('dark');
 			}
+			var icon = document.querySelector('link[rel="icon"]');
+			if (icon) icon.href = isDark ? '/favicon.svg' : '/favicon-light.svg';
 		}
 		applyTheme();
 		document.addEventListener('astro:after-swap', applyTheme);

@@ -26,6 +26,8 @@
 		dark = !dark;
 		document.documentElement.classList.toggle('dark', dark);
 		localStorage.setItem('theme', dark ? 'dark' : 'light');
+		const icon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+		if (icon) icon.href = dark ? '/favicon.svg' : '/favicon-light.svg';
 	}
 </script>
 
