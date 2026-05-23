@@ -21,9 +21,9 @@ const { href, title, description, external = false, tag, date, tags = [] } = Ast
 		class="group block cursor-pointer rounded-xl overflow-hidden transition-transform duration-200 hover:scale-[1.01]"
 		style="background-color: var(--color-accent-light);"
 	>
-		<div class="flex items-center justify-between gap-4 px-5 py-5" style="min-height: 100px;">
-			<div>
-				<p class="text-xl font-bold text-ink leading-snug" style="font-family: var(--font-heading);">{title}</p>
+		<div class="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 sm:py-5" style="min-height: 88px;">
+			<div class="min-w-0">
+				<p class="text-lg sm:text-xl font-bold text-ink leading-snug" style="font-family: var(--font-heading);">{title}</p>
 				{description && <p class="text-sm text-ink-light mt-1 leading-relaxed">{description}</p>}
 				{(tag || date) && (
 					<div class="flex items-center gap-1.5 mt-1.5">
