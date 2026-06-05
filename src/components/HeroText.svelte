@@ -7,7 +7,12 @@
 		class="text-3xl sm:text-4xl font-bold leading-snug text-ink mb-4"
 		style="font-family: var(--font-heading);"
 	>
-		Hi there
+		<a
+			href="https://www.youtube.com/watch?v=rEq1Z0bjdwc"
+			target="_blank"
+			rel="noopener noreferrer"
+			style="color: inherit;"
+		>Hello there</a>
 	</h1>
 	<p class="text-lg text-ink-light leading-relaxed mb-4">
 		I'm a software engineer with many hats 🧙: UX, design, backend, devops. This sometimes makes it hard to stay true to the <a href="https://boringtechnology.club/" target="_blank" rel="noopener noreferrer">boring technology</a> principle.
