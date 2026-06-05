@@ -9,7 +9,7 @@
 	const GRAVITY = 90;
 	const BURST = 32;
 	const VANISH_FRAC = 0; // 0 = every pixel falls & stacks
-	const REPARO_MS = 250;
+	const REPARO_MS = 500;
 
 	const RADIUS = 60;
 	const PUSH_FORCE = 18;
