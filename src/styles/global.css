@@ -167,6 +167,22 @@
 
 /* Page transitions */
 
+/* Theme switch ripple (View Transitions). Scoped to [data-theme-ripple] so it
+   only applies while toggling the theme — page navigations keep their own
+   transitions. The clip-path that grows the new theme is animated in JS. */
+html[data-theme-ripple]::view-transition-old(root),
+html[data-theme-ripple]::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+html[data-theme-ripple]::view-transition-new(root) { z-index: 1; }
+html[data-theme-ripple]::view-transition-old(root) { z-index: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+	html[data-theme-ripple]::view-transition-old(root),
+	html[data-theme-ripple]::view-transition-new(root) { animation: none; }
+}
+
 .sr-only {
 	position: absolute;
 	width: 1px;
