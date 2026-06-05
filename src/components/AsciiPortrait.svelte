@@ -9,9 +9,15 @@
 	const RETURN_SPEED = 0.12;
 
 	let loaded = $state(false);
+	let exploded = $state(false);
+	let restoring = $state(false);
 	let mouseX = -1000;
 	let mouseY = -1000;
 	let animId: number;
+	let explodeAnimId: number;
+	let overlayEl: HTMLDivElement | undefined;
+	let overlayCanvas: HTMLCanvasElement | undefined;
+	let restoreFn: (() => void) | undefined;
 
 	type CharData = { char: string; x: number; y: number; color: string };
 	type RectData = { x: number; y: number; w: number; h: number; color: string };
@@ -70,12 +76,9 @@
 		const ctx = canvasEl.getContext('2d');
 		if (!ctx) return;
 
-		const resizeObserver = new ResizeObserver(() => {
-			resizeCanvas();
-		});
+		const resizeObserver = new ResizeObserver(() => resizeCanvas());
 		resizeObserver.observe(containerEl);
 
-		// Build displacement arrays for rects and chars separately
 		const rectDx = new Float32Array(rects.length);
 		const rectDy = new Float32Array(rects.length);
 		const charDx = new Float32Array(chars.length);
@@ -88,7 +91,6 @@
 			if (!ctx) return;
 			ctx.clearRect(0, 0, size, size);
 
-			// Apply forces from cursor
 			if (mouseX > -500) {
 				for (let i = 0; i < rects.length; i++) {
 					const cx = (rects[i].x + rects[i].w / 2) * scale;
@@ -119,7 +121,6 @@
 				}
 			}
 
-			// Draw all rects
 			for (let i = 0; i < rects.length; i++) {
 				rectDx[i] *= (1 - RETURN_SPEED);
 				rectDy[i] *= (1 - RETURN_SPEED);
@@ -127,12 +128,11 @@
 				ctx.fillRect(
 					rects[i].x * scale + rectDx[i],
 					rects[i].y * scale + rectDy[i],
-					rects[i].w * scale,
-					rects[i].h * scale
+					rects[i].w * scale + 0.5,
+					rects[i].h * scale + 0.5
 				);
 			}
 
-			// Draw all chars
 			ctx.font = fontStr;
 			ctx.textBaseline = 'alphabetic';
 			for (let i = 0; i < chars.length; i++) {
@@ -151,20 +151,173 @@
 
 		render();
 
+		function explode() {
+			if (exploded || !canvasEl) return;
+			exploded = true;
+			cancelAnimationFrame(animId);
+
+			const canvasRect = canvasEl.getBoundingClientRect();
+			const scrollY = window.scrollY;
+			const centerX = canvasRect.left + canvasRect.width / 2;
+			const centerY = canvasRect.top + scrollY + canvasRect.height / 2;
+
+			const pageW = document.documentElement.scrollWidth;
+			const pageH = document.documentElement.scrollHeight;
+
+			const step = 10;
+			const n = Math.ceil(chars.length / step);
+
+			const px = new Float32Array(n);
+			const py = new Float32Array(n);
+			const vx = new Float32Array(n);
+			const vy = new Float32Array(n);
+			const ox = new Float32Array(n);
+			const oy = new Float32Array(n);
+			const colors: string[] = [];
+			const glyphs: string[] = [];
+
+			for (let i = 0, j = 0; i < chars.length; i += step, j++) {
+				const x = canvasRect.left + chars[i].x * scale + charDx[i];
+				const y = canvasRect.top + scrollY + chars[i].y * scale + charDy[i];
+				px[j] = x;
+				py[j] = y;
+				ox[j] = x;
+				oy[j] = y;
+				const angle = Math.atan2(y - centerY, x - centerX) + (Math.random() - 0.5) * 1.2;
+				const speed = 10 + Math.random() * 18;
+				vx[j] = Math.cos(angle) * speed;
+				vy[j] = Math.sin(angle) * speed - Math.random() * 8;
+				colors.push(chars[i].color);
+				glyphs.push(chars[i].char);
+			}
+
+			const wrapper = document.createElement('div');
+			wrapper.style.cssText = 'position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:9999;';
+			wrapper.style.height = pageH + 'px';
+			document.body.appendChild(wrapper);
+			overlayEl = wrapper;
+
+			const canvas = document.createElement('canvas');
+			canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+			const odpr = window.devicePixelRatio || 1;
+			canvas.width = pageW * odpr;
+			canvas.height = pageH * odpr;
+			wrapper.appendChild(canvas);
+			overlayCanvas = canvas;
+
+			const octx = canvas.getContext('2d');
+			if (!octx) return;
+			octx.scale(odpr, odpr);
+
+			canvasEl.style.visibility = 'hidden';
+			const fontSize = `bold ${10 * scale}px monospace`;
+			const GRAVITY = 0.5;
+			const BOUNCE = 0.3;
+			const FRICTION = 0.99;
+			const floorY = pageH - 10;
+
+			function tick() {
+				if (!octx) return;
+				octx.clearRect(0, 0, pageW, pageH);
+				octx.font = fontSize;
+				octx.textBaseline = 'middle';
+				let active = 0;
+
+				for (let i = 0; i < n; i++) {
+					vy[i] += GRAVITY;
+					vx[i] *= FRICTION;
+					px[i] += vx[i];
+					py[i] += vy[i];
+
+					if (py[i] > floorY) {
+						py[i] = floorY;
+						vy[i] *= -BOUNCE;
+						vx[i] *= 0.8;
+					}
+					if (px[i] < 0) { px[i] = 0; vx[i] *= -0.5; }
+					if (px[i] > pageW) { px[i] = pageW; vx[i] *= -0.5; }
+
+					if (Math.abs(vx[i]) > 0.1 || Math.abs(vy[i]) > 0.1) active++;
+
+					octx.fillStyle = colors[i];
+					octx.fillText(glyphs[i], px[i], py[i]);
+				}
+
+				if (active > 0) {
+					explodeAnimId = requestAnimationFrame(tick);
+				}
+			}
+
+			tick();
+
+			restoreFn = () => {
+				if (!octx || !canvasEl) return;
+				cancelAnimationFrame(explodeAnimId);
+				restoring = true;
+
+				function restore() {
+					if (!octx) return;
+					octx.clearRect(0, 0, pageW, pageH);
+					octx.font = fontSize;
+					octx.textBaseline = 'middle';
+					let done = 0;
+
+					for (let i = 0; i < n; i++) {
+						px[i] += (ox[i] - px[i]) * 0.15;
+						py[i] += (oy[i] - py[i]) * 0.15;
+
+						const dx = ox[i] - px[i];
+						const dy = oy[i] - py[i];
+						if (dx * dx + dy * dy < 1) {
+							px[i] = ox[i];
+							py[i] = oy[i];
+							done++;
+						}
+
+						octx.fillStyle = colors[i];
+						octx.fillText(glyphs[i], px[i], py[i]);
+					}
+
+					if (done < n) {
+						explodeAnimId = requestAnimationFrame(restore);
+					} else {
+						wrapper.remove();
+						overlayEl = undefined;
+						overlayCanvas = undefined;
+						if (canvasEl) canvasEl.style.visibility = '';
+						charDx.fill(0);
+						charDy.fill(0);
+						rectDx.fill(0);
+						rectDy.fill(0);
+						exploded = false;
+						restoring = false;
+						render();
+					}
+				}
+
+				restore();
+			};
+		}
+
 		const el = containerEl;
 		const onTouchStart = (e: TouchEvent) => { e.preventDefault(); handleTouchStart(e); };
 		const onTouchMove = (e: TouchEvent) => { e.preventDefault(); handleTouchMove(e); };
 		const onTouchEnd = () => handleLeave();
+		const onClick = () => explode();
 		el.addEventListener('touchstart', onTouchStart, { passive: false });
 		el.addEventListener('touchmove', onTouchMove, { passive: false });
 		el.addEventListener('touchend', onTouchEnd);
+		el.addEventListener('click', onClick);
 
 		return () => {
 			if (animId) cancelAnimationFrame(animId);
+			if (explodeAnimId) cancelAnimationFrame(explodeAnimId);
 			resizeObserver.disconnect();
 			el.removeEventListener('touchstart', onTouchStart);
 			el.removeEventListener('touchmove', onTouchMove);
 			el.removeEventListener('touchend', onTouchEnd);
+			el.removeEventListener('click', onClick);
+			if (overlayEl) overlayEl.remove();
 		};
 	});
 
@@ -194,16 +347,27 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	bind:this={containerEl}
-	class="select-none w-full md:max-w-lg aspect-square touch-none"
-	onmousemove={handleMouseMove}
-	onmouseleave={handleLeave}
->
-	{#if loaded}
-		<canvas
-			bind:this={canvasEl}
-			class="w-full h-full rounded-lg"
-		></canvas>
+<div class="relative">
+	<div
+		bind:this={containerEl}
+		class="select-none w-full md:max-w-lg aspect-square touch-none"
+		onmousemove={handleMouseMove}
+		onmouseleave={handleLeave}
+	>
+		{#if loaded}
+			<canvas
+				bind:this={canvasEl}
+				class="w-full h-full rounded-lg"
+			></canvas>
+		{/if}
+	</div>
+	{#if exploded && !restoring}
+		<button
+			onclick={() => restoreFn?.()}
+			class="absolute inset-0 flex items-center justify-center text-sm text-stone hover:text-ink transition-colors"
+			style="font-style: italic;"
+		>
+			Reparo
+		</button>
 	{/if}
 </div>

@@ -1,17 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import LinkCard from '../../components/LinkCard.astro';
+import ListItem from '../../components/ListItem.astro';
 import FilterableList from '../../components/FilterableList.svelte';
 import { getBlogUrl } from '../../lib/blog';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
-
-function formatDate(date: Date): string {
-	return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-}
 
 const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 ---
@@ -22,14 +18,12 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))].sort();
 		<p class="text-ink-light mb-8">Thoughts on AI, design, and building things that work.</p>
 
 		<FilterableList client:load items={posts.map(p => ({ tags: p.data.tags ?? [] }))} tags={allTags}>
-			<div class="space-y-6">
+			<div class="space-y-1">
 				{posts.map((post) => (
-					<LinkCard
+					<ListItem
 						href={getBlogUrl(post.id, post.data.title)}
 						title={post.data.title}
 						description={post.data.description}
-						tag={(post.data.tags ?? [])[0]}
-						date={formatDate(post.data.pubDate)}
 						tags={post.data.tags}
 					/>
 				))}

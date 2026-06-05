@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroText from '../components/HeroText.svelte';
-import LinkCard from '../components/LinkCard.astro';
+import ListItem from '../components/ListItem.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { getBlogUrl } from '../lib/blog';
 
@@ -10,9 +10,6 @@ const posts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.slice(0, 3);
 
-function formatDate(date: Date): string {
-	return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-}
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
@@ -20,33 +17,16 @@ function formatDate(date: Date): string {
 		<HeroText client:load />
 	</section>
 
-	<section class="max-w-2xl mx-auto px-4 pt-20 pb-16">
-		<h2 class="text-3xl sm:text-4xl font-bold mb-4" style="font-family: var(--font-heading);">Hi, I'm Simon</h2>
-
-		<p class="text-lg text-ink-light leading-relaxed mb-4">
-			I write code to think. Most of what I know came from making things, breaking them, and trying again. Lately, three questions drive my work:
-		</p>
-
-		<ul class="list-disc pl-6 space-y-2 text-lg text-ink-light leading-relaxed marker:text-accent">
-			<li><strong class="text-ink">Where AI lives</strong> is in the interface itself: not a feature you open, but something you feel.</li>
-			<li><strong class="text-ink">What makes AI useful</strong> is doing the right thing quietly, not making suggestions you constantly have to fix.</li>
-			<li><strong class="text-ink">What makes AI trustworthy</strong> is being transparent, predictable, and honest about what it can and can't do.</li>
-		</ul>
-	</section>
-
 	{posts.length > 0 && (
-		<section class="max-w-2xl mx-auto px-4 pb-16 pt-8">
-			<h2 class="text-3xl sm:text-4xl font-bold mb-4" style="font-family: var(--font-heading);">Recent writing</h2>
+		<section class="max-w-2xl mx-auto px-4 pt-20 pb-16">
+			<h2 class="text-2xl sm:text-3xl font-bold mb-4" style="font-family: var(--font-heading);">Writing</h2>
 
-			<div class="space-y-6">
+			<div class="space-y-1">
 				{posts.map((post) => (
-					<LinkCard
+					<ListItem
 						href={getBlogUrl(post.id, post.data.title)}
 						title={post.data.title}
 						description={post.data.description}
-						tag={(post.data.tags ?? [])[0]}
-						date={formatDate(post.data.pubDate)}
-						tags={post.data.tags}
 					/>
 				))}
 			</div>

@@ -3,18 +3,17 @@
 </script>
 
 {#snippet heroText()}
-	<p
-		class="text-3xl sm:text-4xl font-bold leading-snug text-ink mb-6"
+	<h1
+		class="text-3xl sm:text-4xl font-bold leading-snug text-ink mb-4"
 		style="font-family: var(--font-heading);"
 	>
-		Reimagining software with intelligence at its heart.
-	</p>
+		Hi there
+	</h1>
 	<p class="text-lg text-ink-light leading-relaxed mb-4">
-		Most AI products today are <a href="https://koomen.dev/essays/horseless-carriages/" target="_blank" rel="noopener noreferrer">horseless carriages</a>.
-		Old interfaces with AI tacked on, not reimagined around it.
+		I'm a software engineer with many hats 🧙: UX, design, backend, devops. This sometimes makes it hard to stay true to the <a href="https://boringtechnology.club/" target="_blank" rel="noopener noreferrer">boring technology</a> principle.
 	</p>
-	<p class="text-lg text-ink-light leading-relaxed">
-		I'm working on what comes after.
+	<p class="text-lg text-stone">
+		I write about where AI should live, what makes it useful, and what makes it trustworthy.
 	</p>
 {/snippet}
 

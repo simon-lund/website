@@ -1,16 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import LinkCard from '../components/LinkCard.astro';
+import ListItem from '../components/ListItem.astro';
 import FilterableList from '../components/FilterableList.svelte';
 
 const links = (await getCollection('links')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
-
-function formatDate(date: Date): string {
-	return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-}
 
 const allTags = [...new Set(links.flatMap((l) => l.data.tags ?? []))].sort();
 ---
@@ -21,14 +17,12 @@ const allTags = [...new Set(links.flatMap((l) => l.data.tags ?? []))].sort();
 		<p class="text-ink-light mb-8">Articles, talks, and tools I've found worth thinking about.</p>
 
 		<FilterableList client:load items={links.map(l => ({ tags: l.data.tags ?? [] }))} tags={allTags}>
-			<div class="space-y-6">
+			<div class="space-y-1">
 				{links.map((link) => (
-					<LinkCard
+					<ListItem
 						href={link.data.url}
 						title={link.data.title}
 						description={link.data.comment}
-						tag={link.data.tags?.[0]}
-						date={formatDate(link.data.pubDate)}
 						tags={link.data.tags}
 						external
 					/>
