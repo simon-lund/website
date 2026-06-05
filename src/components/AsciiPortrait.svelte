@@ -6,10 +6,10 @@
 	// with physics on click. "Reparo" eases every pixel back to its exact origin.
 	const PIXEL_GRID = 69; // squares per side
 	const SCALE = 50; // pixels per physics-metre
-	const GRAVITY = 90;
+	const GRAVITY = 150; // higher = pixels fall/settle faster (snappier explosion)
 	const BURST = 32;
 	const VANISH_FRAC = 0; // 0 = every pixel falls & stacks
-	const REPARO_MS = 500;
+	const REPARO_MS = 750;
 
 	const RADIUS = 60;
 	const PUSH_FORCE = 18;
