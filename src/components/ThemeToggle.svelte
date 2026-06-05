@@ -42,7 +42,8 @@
 		}
 
 		// Ripple origin = centre of the toggle button.
-		const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+		const btn = event.currentTarget as HTMLElement;
+		const rect = btn.getBoundingClientRect();
 		const x = rect.left + rect.width / 2;
 		const y = rect.top + rect.height / 2;
 		const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
@@ -54,6 +55,8 @@
 			document.querySelectorAll<HTMLElement>('[data-astro-transition-persist],[data-astro-transition-scope]')
 		);
 		named.forEach((el) => (el.style.viewTransitionName = 'none'));
+		// The icon rides above the ripple in its own snapshot so it can spin.
+		btn.style.viewTransitionName = 'theme-toggle';
 		root.dataset.themeRipple = '';
 
 		const transition = start(applyTheme);
@@ -75,6 +78,7 @@
 		transition.finished.finally(() => {
 			delete root.dataset.themeRipple;
 			named.forEach((el) => (el.style.viewTransitionName = ''));
+			btn.style.viewTransitionName = '';
 		});
 	}
 </script>
