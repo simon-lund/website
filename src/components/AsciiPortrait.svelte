@@ -139,7 +139,7 @@
 		const charDx = new Float32Array(chars.length);
 		const charDy = new Float32Array(chars.length);
 
-		const fontStr = `bold ${10 * scale}px monospace`;
+		const fontStr = `bold ${12 * scale}px monospace`;
 		const r2 = RADIUS * scale;
 
 		ctx.font = fontStr;
