@@ -47,7 +47,7 @@
 <button
 	bind:this={fabEl}
 	onclick={scrollToTop}
-	class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full
+	class="fixed bottom-6 right-6 lg:right-auto lg:left-[calc(50%_+_22rem)] z-40 w-12 h-12 rounded-full
 		bg-accent text-white shadow-lg hover:bg-accent-hover
 		flex items-center justify-center transition-colors duration-200
 		cursor-pointer will-change-transform"
