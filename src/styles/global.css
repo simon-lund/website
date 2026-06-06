@@ -97,6 +97,8 @@
 		color: var(--color-ink-light);
 		font-style: italic;
 	}
+	/* drop the inner paragraph's bottom margin so it doesn't add a blank line */
+	& blockquote > :last-child { margin-bottom: 0; }
 
 	& hr {
 		border: none;
