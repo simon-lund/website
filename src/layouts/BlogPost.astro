@@ -8,29 +8,41 @@ import RocketFab from '../components/RocketFab.svelte';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate } = Astro.props;
+const { title, description, pubDate, updatedDate, tags } = Astro.props;
+const kicker = tags?.[0];
 ---
 
 <BaseLayout title={title} description={description}>
-	<article class="max-w-2xl mx-auto px-4 pt-24 pb-16">
+	<article class="max-w-2xl mx-auto px-4 pt-20 pb-16">
 		<header class="mb-12">
-			<div class="flex items-center justify-between mb-4">
-				<div class="flex items-center gap-4">
-					<BackButton client:load />
-					<div class="text-sm text-stone">
-						<FormattedDate date={pubDate} />
-						{updatedDate && (
-							<span class="ml-2 italic">
-								(updated <FormattedDate date={updatedDate} />)
-							</span>
-						)}
-					</div>
-				</div>
-				<CopyLinkButton client:load />
+			<div class="mb-8">
+				<BackButton client:load />
 			</div>
-			<h1 class="text-2xl sm:text-3xl font-bold leading-tight" style="font-family: var(--font-heading);">
+
+			{kicker && (
+				<span class="inline-block text-xs font-semibold uppercase tracking-[0.08em] text-accent mb-4">
+					{kicker}
+				</span>
+			)}
+
+			<h1 class="text-4xl sm:text-5xl font-bold tracking-tight" style="font-family: var(--font-heading); line-height: 1.08;">
 				{title}
 			</h1>
+
+			{description && (
+				<p class="mt-5 text-lg sm:text-xl text-ink-light leading-relaxed max-w-xl">
+					{description}
+				</p>
+			)}
+
+			<div class="flex items-center gap-3 mt-7 text-sm text-stone">
+				<FormattedDate date={pubDate} />
+				{updatedDate && (
+					<span class="italic">(updated <FormattedDate date={updatedDate} />)</span>
+				)}
+				<span class="text-stone-light">·</span>
+				<CopyLinkButton client:load />
+			</div>
 		</header>
 
 		<div class="prose">
