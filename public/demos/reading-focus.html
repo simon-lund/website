@@ -93,8 +93,13 @@
     }
     function move(d) {
       idx = Math.max(0, Math.min(els.length - 1, idx + d));
-      els[idx].scrollIntoView({ block: 'center', behavior: 'smooth' });
       position();
+      // Scroll only the iframe's OWN document (this window is the iframe's).
+      // scrollIntoView() would propagate across the frame and scroll the parent
+      // page too — which is exactly what we don't want here. scrollTo clamps to
+      // [0, maxScroll], so it's a no-op when the demo content already fits.
+      const r = els[idx].getBoundingClientRect();
+      window.scrollTo({ top: window.scrollY + r.top - window.innerHeight * 0.3, behavior: 'smooth' });
     }
     function start() {
       doc.classList.add('reading-focus');
