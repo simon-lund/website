@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reading focus — demo</title>
+  <style>
+    :root {
+      --cream:#faf6f0; --cream-d:#f0ebe4; --ink:#1a1917; --ink-light:#4a4540;
+      --muted:#6b6760; --accent:#c07f52; --border:#ece6dd;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--cream); color: var(--ink);
+      padding: 1.4rem 1.6rem 4.5rem; line-height: 1.75;
+    }
+    h2 { font-size: 1.2rem; margin: 0 0 .7rem; letter-spacing: -.01em; }
+    p { margin: 0 0 .9rem; color: var(--ink-light); }
+    .start {
+      position: fixed; top: 1rem; right: 1.2rem; z-index: 70;
+      padding: .5rem 1rem; border: none; border-radius: 999px;
+      background: var(--ink); color: var(--cream); font-size: .82rem; font-weight: 600; cursor: pointer;
+    }
+    /* looser spacing while focusing — more daylight between lines */
+    .reading-focus p, .reading-focus h2 { line-height: 2.05; }
+
+    /* the spotlight: one box-shadow dims everything but its own rectangle */
+    .spotlight {
+      position: fixed; border-radius: 7px;
+      box-shadow: 0 0 0 9999px rgba(22, 20, 17, 0.62);
+      pointer-events: none; z-index: 50;
+      transition: top .16s ease, left .16s ease, width .16s ease, height .16s ease;
+    }
+
+    .bar {
+      position: fixed; bottom: .9rem; left: 50%; transform: translateX(-50%); z-index: 60;
+      display: none; align-items: center; gap: .25rem;
+      background: var(--cream); color: var(--ink);
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: .35rem .5rem; box-shadow: 0 10px 28px rgba(0,0,0,.18);
+    }
+    .bar.on { display: flex; }
+    .bar button {
+      border: none; background: none; color: var(--ink); cursor: pointer;
+      padding: .35rem; border-radius: 999px; display: inline-flex;
+    }
+    .bar button:hover { color: var(--accent); background: var(--cream-d); }
+    .bar .count { font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; padding: 0 .4rem; }
+    .bar .hint { font-size: .72rem; color: var(--ink-light); padding: 0 .35rem; }
+    .bar .sep { width: 1px; height: 1.1rem; background: var(--border); margin: 0 .15rem; }
+    @media (prefers-reduced-motion: reduce) { .spotlight { transition: none; } }
+  </style>
+</head>
+<body>
+  <button class="start" id="start">Focus reading ›</button>
+
+  <article id="doc">
+    <h2>Reading in the margins</h2>
+    <p>Long lines are hard to track. Your eye reaches the end of one and, on the way back, lands a row too high or too low — so you read the same sentence twice, or skip one entirely.</p>
+    <p>Focus mode lights up a single block and dims everything around it. Step with the arrow keys (or the buttons below), and the rest of the page falls away.</p>
+    <p>It also loosens the line spacing while it's on, so there's more daylight between lines — fewer places for your eye to slip.</p>
+  </article>
+
+  <div class="bar" id="bar" role="toolbar" aria-label="Reading focus controls">
+    <button id="prev" aria-label="Previous block"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
+    <span class="count" id="count">1 / 4</span>
+    <button id="next" aria-label="Next block"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <span class="sep"></span>
+    <span class="hint">↑ ↓ · Esc</span>
+    <button id="exit" aria-label="Exit focus"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+  </div>
+
+  <script>
+    const doc = document.getElementById('doc');
+    const bar = document.getElementById('bar');
+    const startBtn = document.getElementById('start');
+    const countEl = document.getElementById('count');
+    let els = [], idx = 0, active = false, spot = null;
+
+    const rects = () => els.map((el) => el.getBoundingClientRect()); // viewport coords (spotlight is fixed)
+
+    function position() {
+      const r = els[idx]?.getBoundingClientRect();
+      if (!spot || !r) return;
+      const pad = 6;
+      spot.style.top = (r.top - pad) + 'px';
+      spot.style.left = (r.left - pad) + 'px';
+      spot.style.width = (r.width + pad * 2) + 'px';
+      spot.style.height = (r.height + pad * 2) + 'px';
+      countEl.textContent = (idx + 1) + ' / ' + els.length;
+    }
+    function move(d) {
+      idx = Math.max(0, Math.min(els.length - 1, idx + d));
+      els[idx].scrollIntoView({ block: 'center', behavior: 'smooth' });
+      position();
+    }
+    function start() {
+      doc.classList.add('reading-focus');
+      active = true;
+      requestAnimationFrame(() => {
+        els = [...doc.querySelectorAll('p, h2')];
+        idx = 0;
+        spot = document.createElement('div');
+        spot.className = 'spotlight';
+        document.body.appendChild(spot);
+        position();
+        bar.classList.add('on');
+        startBtn.style.display = 'none';
+      });
+    }
+    function stop() {
+      active = false;
+      doc.classList.remove('reading-focus');
+      spot?.remove(); spot = null;
+      bar.classList.remove('on');
+      startBtn.style.display = '';
+    }
+
+    startBtn.onclick = start;
+    document.getElementById('prev').onclick = () => move(-1);
+    document.getElementById('next').onclick = () => move(1);
+    document.getElementById('exit').onclick = stop;
+    addEventListener('keydown', (e) => {
+      if (!active) return;
+      if (e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Escape') { stop(); }
+    });
+    addEventListener('scroll', () => active && position(), { passive: true });
+    addEventListener('resize', () => active && position());
+  </script>
+</body>
+</html>
