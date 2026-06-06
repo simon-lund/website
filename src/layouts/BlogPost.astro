@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import CopyLinkButton from '../components/CopyLinkButton.svelte';
+import ReadingFocus from '../components/ReadingFocus.svelte';
 import BackButton from '../components/BackButton.svelte';
 import RocketFab from '../components/RocketFab.svelte';
 
@@ -48,6 +49,7 @@ const kicker = tags?.[0];
 				)}
 				<span class="text-stone-light">·</span>
 				<CopyLinkButton client:load />
+				<ReadingFocus client:load />
 			</div>
 		</header>
 

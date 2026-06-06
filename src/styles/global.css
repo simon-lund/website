@@ -262,3 +262,22 @@ html[data-theme-ripple]::view-transition-new(theme-toggle) {
 	white-space: nowrap;
 	border-width: 0;
 }
+
+/* Reading focus mode — line-by-line reading aid (ReadingFocus.svelte) */
+.reading-focus :is(p, li, h2, h3, h4, blockquote) {
+	line-height: 2.1;
+}
+.reading-spotlight {
+	position: absolute;
+	border-radius: 7px;
+	box-shadow: 0 0 0 100vmax rgba(22, 20, 17, 0.62);
+	border-bottom: 2px solid var(--color-accent);
+	pointer-events: none;
+	z-index: 55;
+	transition: top 0.16s ease, left 0.16s ease, width 0.16s ease, height 0.16s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+	.reading-spotlight {
+		transition: none;
+	}
+}
