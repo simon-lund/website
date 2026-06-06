@@ -23,17 +23,12 @@
 {/snippet}
 
 <div class="relative max-w-5xl mx-auto">
-	<!-- Mobile: text only -->
-	<div class="md:hidden px-2">
-		{@render heroText()}
-	</div>
-
-	<!-- Desktop: two-column layout -->
-	<div class="hidden md:grid md:grid-cols-2 gap-16 items-center">
-		<div class="flex justify-end">
+	<!-- Stacked (image → text) on mobile, two columns on desktop -->
+	<div class="flex flex-col gap-10 md:grid md:grid-cols-2 md:gap-16 md:items-center">
+		<div class="mx-auto w-60 sm:w-72 md:mx-0 md:w-auto md:flex md:justify-end">
 			<AsciiPortrait />
 		</div>
-		<div>
+		<div class="px-2 md:px-0">
 			{@render heroText()}
 		</div>
 	</div>
