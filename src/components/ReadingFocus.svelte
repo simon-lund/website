@@ -151,7 +151,7 @@
 {#if active}
 	<div
 		use:portal
-		class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1.5 rounded-full
+		class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex w-max max-w-[calc(100vw-1.5rem)] items-center gap-1.5 whitespace-nowrap rounded-full
 			border border-ink/10 bg-cream px-3 py-2 text-ink shadow-2xl ring-1 ring-black/10"
 		role="toolbar"
 		aria-label="Reading focus controls"
@@ -159,7 +159,7 @@
 		<button onclick={() => move(-1)} class="p-2 rounded-full text-ink hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Previous line">
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6" /></svg>
 		</button>
-		<span class="px-1.5 text-sm font-semibold tabular-nums select-none">{idx + 1} / {count}</span>
+		<span class="px-1.5 text-sm font-semibold tabular-nums whitespace-nowrap shrink-0 select-none">{idx + 1} / {count}</span>
 		<button onclick={() => move(1)} class="p-2 rounded-full text-ink hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Next line">
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
 		</button>
