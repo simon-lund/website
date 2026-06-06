@@ -34,6 +34,7 @@
 	let restoreFn: (() => void) | undefined;
 	let physicsWorld: any = null;
 	let kickRender: (() => void) | null = null;
+	let pileCleanup: (() => void) | null = null; // remove ball-pit listeners
 
 	let RAPIER: any = null;
 	let rapierPromise: Promise<any> | null = null;
@@ -254,53 +255,90 @@
 
 			canvasEl.style.visibility = 'hidden';
 			const dw = cell + 0.6;
-			const VANISH_END = 12;
-			const alive = new Uint8Array(n).fill(1);
-			let frame = 0;
+
+			// Ball-pit interaction: the cursor shoves nearby pixels. Most of a
+			// settled pile sleeps (≈free); only disturbed pixels wake & cost work,
+			// and the loop pauses entirely once everything re-settles.
+			const PILE_R = 95;
+			const PILE_R2 = PILE_R * PILE_R;
+			const PILE_PUSH = 6;
+			let curX = -1e9;
+			let curY = -1e9;
+			let curMoveT = -1e9;
+			let looping = true;
 
 			function tick() {
 				if (!octx) return;
 				world.step();
 				frame++;
-				if (frame === 14) for (let i = 0; i < n; i++) if (alive[i]) colliders[i].setCollisionGroups(G_STACK);
+				if (frame === 14) for (let i = 0; i < n; i++) colliders[i].setCollisionGroups(G_STACK);
 
 				octx.clearRect(0, 0, vw, vh);
-				let moving = 0;
+				const stir = performance.now() - curMoveT < 120;
+				let awake = 0;
 				for (let i = 0; i < n; i++) {
-					if (!alive[i]) continue;
 					const t = bodies[i].translation();
 					const x = t.x * SCALE;
 					const y = t.y * SCALE;
-					if (!lasting[i]) {
-						const a = Math.max(0, 1 - (frame - 2) / (VANISH_END - 2));
-						if (a <= 0) continue;
-						octx.globalAlpha = a;
+					let v = bodies[i].linvel();
+					if (stir) {
+						const dx = x - curX;
+						const dy = y - curY;
+						const d2 = dx * dx + dy * dy;
+						if (d2 < PILE_R2 && d2 > 1) {
+							const d = Math.sqrt(d2);
+							const f = (1 - d / PILE_R) * PILE_PUSH;
+							bodies[i].setLinvel({ x: v.x + (dx / d) * f, y: v.y + (dy / d) * f }, true);
+							v = bodies[i].linvel();
+						}
 					}
-					const v = bodies[i].linvel();
-					if (lasting[i] && Math.abs(v.x) + Math.abs(v.y) > 0.06) moving++;
+					if (Math.abs(v.x) + Math.abs(v.y) > 0.06) awake++;
 					octx.fillStyle = cols[i];
 					octx.fillRect(x - half, y - half, dw, dw);
-					if (!lasting[i]) octx.globalAlpha = 1;
 				}
-				if (frame === VANISH_END) for (let i = 0; i < n; i++) if (!lasting[i] && alive[i]) { world.removeRigidBody(bodies[i]); alive[i] = 0; }
 
-				if (moving > n * 0.01 && frame < 360) explodeAnimId = requestAnimationFrame(tick);
+				if (awake > 0) {
+					explodeAnimId = requestAnimationFrame(tick);
+				} else {
+					looping = false; // pile asleep — pause until the cursor stirs it
+				}
 			}
+
+			let frame = 0;
+
+			// Stir the pile from anywhere over the page while it's exploded.
+			const onCur = (cx: number, cy: number) => {
+				curX = cx;
+				curY = cy;
+				curMoveT = performance.now();
+				if (!looping && exploded && !restoring) {
+					looping = true;
+					explodeAnimId = requestAnimationFrame(tick);
+				}
+			};
+			const pmMouse = (e: MouseEvent) => onCur(e.clientX, e.clientY);
+			const pmTouch = (e: TouchEvent) => { if (e.touches[0]) onCur(e.touches[0].clientX, e.touches[0].clientY); };
+			window.addEventListener('mousemove', pmMouse);
+			window.addEventListener('touchmove', pmTouch, { passive: true });
+			pileCleanup = () => {
+				window.removeEventListener('mousemove', pmMouse);
+				window.removeEventListener('touchmove', pmTouch);
+				pileCleanup = null;
+			};
+
 			explodeAnimId = requestAnimationFrame(tick);
 
 			restoreFn = () => {
 				if (!octx) return;
 				cancelAnimationFrame(explodeAnimId);
 				restoring = true;
+				pileCleanup?.();
 				const sx = new Float32Array(n);
 				const sy = new Float32Array(n);
-				const present = new Uint8Array(n);
 				for (let i = 0; i < n; i++) {
-					if (!alive[i]) continue;
 					const t = bodies[i].translation();
 					sx[i] = t.x * SCALE;
 					sy[i] = t.y * SCALE;
-					present[i] = 1;
 				}
 				world.free();
 				physicsWorld = null;
@@ -315,13 +353,6 @@
 					for (let i = 0; i < n; i++) {
 						const tx = r3.left + ox[i];
 						const ty = r3.top + oy[i];
-						if (!present[i]) {
-							octx.globalAlpha = e;
-							octx.fillStyle = cols[i];
-							octx.fillRect(tx - half, ty - half, dw, dw);
-							octx.globalAlpha = 1;
-							continue;
-						}
 						const x = sx[i] + (tx - sx[i]) * e;
 						const y = sy[i] + (ty - sy[i]) * e;
 						octx.fillStyle = cols[i];
@@ -364,6 +395,7 @@
 			el.removeEventListener('click', onClick);
 			if (overlayCanvas) overlayCanvas.remove();
 			if (physicsWorld) { physicsWorld.free(); physicsWorld = null; }
+			pileCleanup?.();
 		};
 	});
 
