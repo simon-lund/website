@@ -245,7 +245,9 @@
 			const n = bodies.length;
 
 			const overlay = document.createElement('canvas');
-			overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;';
+			// z-index 45: above all page content but below the sticky nav (z-50),
+			// so flying/settling pixels always pass behind the nav bar.
+			overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:45;';
 			overlay.width = vw;
 			overlay.height = vh;
 			document.body.appendChild(overlay);
