@@ -60,23 +60,27 @@
 	}
 
 	async function loadSource(): Promise<CanvasImageSource> {
-		// Prefer a real photo; fall back to the existing portrait.svg.
-		try {
-			const img = new Image();
-			img.src = '/test-portrait.png';
-			await img.decode();
-			return img;
-		} catch (e) {
-			const res = await fetch('/portrait.svg');
-			const txt = await res.text();
-			const url = URL.createObjectURL(new Blob([txt], { type: 'image/svg+xml' }));
-			const svg = new Image();
-			svg.width = 600;
-			svg.height = 600;
-			svg.src = url;
-			await svg.decode();
-			return svg;
+		// Prefer a real photo, then the small pre-rendered WebP (~9 KB, near-instant),
+		// and only fall back to the full 661 KB portrait.svg if neither is present.
+		for (const src of ['/test-portrait.png', '/portrait-small.webp']) {
+			try {
+				const img = new Image();
+				img.src = src;
+				await img.decode();
+				return img;
+			} catch (e) {
+				/* try the next candidate */
+			}
 		}
+		const res = await fetch('/portrait.svg');
+		const txt = await res.text();
+		const url = URL.createObjectURL(new Blob([txt], { type: 'image/svg+xml' }));
+		const svg = new Image();
+		svg.width = 600;
+		svg.height = 600;
+		svg.src = url;
+		await svg.decode();
+		return svg;
 	}
 
 	const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -121,24 +125,29 @@
 		};
 		const cA = hexRgb(cssVars.getPropertyValue('--color-cream-dark'), [240, 235, 228]);
 		const cB = hexRgb(cssVars.getPropertyValue('--color-accent'), [192, 127, 82]);
-		// Wide, soft diagonal bands of warmth flowing across the cream-dark base.
-		const shimmerColor = (gx, gy, t) => {
-			const w = 0.5 + 0.5 * Math.sin((gx + gy) * 0.2 - t * 0.0045);
-			const k = w * w * 0.32;
-			return `rgb(${(cA[0] + (cB[0] - cA[0]) * k) | 0},${(cA[1] + (cB[1] - cA[1]) * k) | 0},${(cA[2] + (cB[2] - cA[2]) * k) | 0})`;
-		};
+		// A single soft, slow diagonal sheen sweeping across the cream-dark base.
+		const baseStr = `rgb(${cA[0]},${cA[1]},${cA[2]})`;
+		const peakStr = `rgb(${(cA[0] + (cB[0] - cA[0]) * 0.28) | 0},${(cA[1] + (cB[1] - cA[1]) * 0.28) | 0},${(cA[2] + (cB[2] - cA[2]) * 0.28) | 0})`;
+		function fillShimmer(t) {
+			if (!ctx) return;
+			const center = ((t * 0.0005) % 1.3) - 0.15;
+			const g = ctx.createLinearGradient(0, 0, size, size);
+			const cl = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+			g.addColorStop(0, baseStr);
+			let prev = 0;
+			for (const [pos, col] of [[center - 0.26, baseStr], [center, peakStr], [center + 0.26, baseStr]]) {
+				const s = Math.min(1, Math.max(prev + 0.0001, cl(pos)));
+				g.addColorStop(s, col);
+				prev = s;
+			}
+			g.addColorStop(1, baseStr);
+			ctx.fillStyle = g;
+			ctx.fillRect(0, 0, size, size);
+		}
 
 		let phase = 'loading';
 		function drawShimmer(t) {
-			if (!ctx) return;
-			const cell = size / PIXEL_GRID;
-			ctx.clearRect(0, 0, size, size);
-			for (let gy = 0; gy < PIXEL_GRID; gy++) {
-				for (let gx = 0; gx < PIXEL_GRID; gx++) {
-					ctx.fillStyle = shimmerColor(gx, gy, t);
-					ctx.fillRect(gx * cell, gy * cell, cell + 0.6, cell + 0.6);
-				}
-			}
+			fillShimmer(t);
 			if (phase === 'loading') requestAnimationFrame(drawShimmer);
 		}
 		requestAnimationFrame(drawShimmer);
@@ -174,10 +183,11 @@
 				const p = Math.min(1, (now - start) / DUR);
 				const front = p * (span + 10);
 				const cell = size / PIXEL_GRID;
-				ctx.clearRect(0, 0, size, size);
+				fillShimmer(now);
 				for (let gy = 0; gy < PIXEL_GRID; gy++) {
 					for (let gx = 0; gx < PIXEL_GRID; gx++) {
-						const col = gx + gy < front - 4 ? colorStr[gy * PIXEL_GRID + gx] : shimmerColor(gx, gy, now);
+						if (gx + gy >= front - 4) continue;
+						const col = colorStr[gy * PIXEL_GRID + gx];
 						if (!col) continue;
 						ctx.fillStyle = col;
 						ctx.fillRect(gx * cell, gy * cell, cell + 0.6, cell + 0.6);

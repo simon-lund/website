@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading: shimmer vs pre-render</title>
+  <style>
+    :root { --cream:#faf6f0; --cream-d:#f0ebe4; --ink:#1a1917; --muted:#6b6760; --accent:#c07f52; --border:#ece6dd; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--cream); color: var(--ink);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.6rem; padding: clamp(1.25rem, 5vw, 2.5rem);
+    }
+    .row { display: flex; gap: clamp(1rem, 4vw, 2.5rem); flex-wrap: wrap; justify-content: center; }
+    .col { display: flex; flex-direction: column; align-items: center; gap: .6rem; width: 240px; }
+    canvas { width: 240px; height: 240px; border-radius: 14px; border: 1px solid var(--border); background: var(--cream-d); }
+    .bar { width: 100%; height: 4px; border-radius: 999px; background: #e7e1d8; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 999px; }
+    .cap { font-size: .82rem; font-weight: 600; color: var(--ink); }
+    .cap .sz { color: var(--muted); font-weight: 400; }
+    .rdy { font-size: .74rem; color: var(--muted); min-height: 1em; font-variant-numeric: tabular-nums; }
+    .rdy.hit { color: var(--accent); }
+    .start {
+      padding: .7rem 1.6rem; border-radius: 999px; border: none; cursor: pointer;
+      background: var(--ink); color: var(--cream); font-size: .95rem; font-weight: 600;
+      transition: transform .15s ease, opacity .2s ease;
+    }
+    .start:hover { transform: translateY(-1px); }
+    .start:active { transform: translateY(0) scale(.97); }
+    .start:disabled { opacity: .5; cursor: default; transform: none; }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <div class="col">
+      <canvas id="left"></canvas>
+      <div class="bar"><i id="lbar"></i></div>
+      <div class="cap">Shimmer <span class="sz">· SVG, 646 KB</span></div>
+      <div class="rdy" id="lrdy"></div>
+    </div>
+    <div class="col">
+      <canvas id="right"></canvas>
+      <div class="bar"><i id="rbar"></i></div>
+      <div class="cap">Pre-render <span class="sz">· WebP, 9 KB</span></div>
+      <div class="rdy" id="rrdy"></div>
+    </div>
+  </div>
+  <button id="start" class="start">Start</button>
+
+  <script>
+    const GRID = 48, SIZE = 240, REVEAL_MS = 700;
+    const THROUGHPUT = 400 * 1024;          // bytes/sec — a so-so connection
+    const cA = [240, 235, 228], cB = [192, 127, 82];
+    const baseStr = `rgb(${cA[0]},${cA[1]},${cA[2]})`;
+    const peakStr = `rgb(${(cA[0]+(cB[0]-cA[0])*0.28)|0},${(cA[1]+(cB[1]-cA[1])*0.28)|0},${(cA[2]+(cB[2]-cA[2])*0.28)|0})`;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const cell = SIZE / GRID;
+
+    function setup(id) {
+      const c = document.getElementById(id);
+      c.width = SIZE * dpr; c.height = SIZE * dpr;
+      const ctx = c.getContext('2d'); ctx.scale(dpr, dpr); return ctx;
+    }
+    const L = setup('left'), R = setup('right');
+
+    let colorGrid = null;
+    async function loadColors() {
+      const img = new Image(); img.width = 600; img.height = 600; img.src = '/portrait.svg';
+      await img.decode();
+      const s = document.createElement('canvas'); s.width = GRID; s.height = GRID;
+      const sx = s.getContext('2d'); sx.imageSmoothingEnabled = true; sx.imageSmoothingQuality = 'high';
+      sx.drawImage(img, 0, 0, GRID, GRID);
+      const d = sx.getImageData(0, 0, GRID, GRID).data;
+      colorGrid = new Array(GRID * GRID);
+      for (let i = 0; i < GRID * GRID; i++) { const o = i * 4; colorGrid[i] = `rgb(${d[o]},${d[o+1]},${d[o+2]})`; }
+    }
+
+    // smooth, slow diagonal sheen — calm and fine, no chunky per-pixel flicker
+    function fillShimmer(ctx, t) {
+      const center = ((t * 0.0005) % 1.3) - 0.15;
+      const g = ctx.createLinearGradient(0, 0, SIZE, SIZE);
+      const cl = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+      g.addColorStop(0, baseStr); let prev = 0;
+      for (const [pos, col] of [[center - 0.26, baseStr], [center, peakStr], [center + 0.26, baseStr]]) {
+        const sp = Math.min(1, Math.max(prev + 0.0001, cl(pos))); g.addColorStop(sp, col); prev = sp;
+      }
+      g.addColorStop(1, baseStr);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, SIZE, SIZE);
+    }
+    function drawPortrait(ctx) {
+      for (let gy = 0; gy < GRID; gy++) for (let gx = 0; gx < GRID; gx++) {
+        ctx.fillStyle = colorGrid[gy * GRID + gx];
+        ctx.fillRect(gx * cell, gy * cell, cell + 0.6, cell + 0.6);
+      }
+    }
+    function clear(ctx) { ctx.fillStyle = baseStr; ctx.fillRect(0, 0, SIZE, SIZE); }
+
+    function run(ctx, bar, rdy, bytes) {
+      const t0 = performance.now();
+      let loadedAt = null;
+      function frame(now) {
+        const dt = now - t0;
+        const prog = Math.min(1, (dt / 1000 * THROUGHPUT) / bytes);
+        bar.style.width = (prog * 100) + '%';
+        if (prog < 1) {
+          fillShimmer(ctx, now);
+          requestAnimationFrame(frame);
+          return;
+        }
+        if (loadedAt === null) {
+          loadedAt = dt;
+          rdy.textContent = 'loaded in ' + (dt / 1000).toFixed(2) + 's';
+          rdy.classList.add('hit');
+        }
+        const rp = Math.min(1, (dt - loadedAt) / REVEAL_MS);
+        const front = rp * (2 * (GRID - 1) + 10);
+        fillShimmer(ctx, now);
+        for (let gy = 0; gy < GRID; gy++) for (let gx = 0; gx < GRID; gx++) {
+          if (gx + gy >= front - 4) continue;
+          ctx.fillStyle = colorGrid[gy * GRID + gx];
+          ctx.fillRect(gx * cell, gy * cell, cell + 0.6, cell + 0.6);
+        }
+        if (rp < 1) requestAnimationFrame(frame);
+        else drawPortrait(ctx);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    const btn = document.getElementById('start');
+    function start() {
+      if (!colorGrid) return;
+      btn.disabled = true;
+      document.getElementById('lrdy').textContent = '';
+      document.getElementById('rrdy').textContent = '';
+      document.getElementById('lrdy').classList.remove('hit');
+      document.getElementById('rrdy').classList.remove('hit');
+      clear(L); clear(R);
+      run(L, document.getElementById('lbar'), document.getElementById('lrdy'), 661508);
+      run(R, document.getElementById('rbar'), document.getElementById('rrdy'), 9078);
+      setTimeout(() => { btn.disabled = false; }, 2600);
+    }
+    btn.addEventListener('click', start);
+    loadColors().then(() => { clear(L); clear(R); });
+  </script>
+</body>
+</html>
