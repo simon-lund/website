@@ -20,14 +20,15 @@
       background: var(--bg); color: var(--text);
       /* fallback only — View Transitions does the real animation */
       transition: background-color .4s ease, color .4s ease;
-      display: flex; flex-direction: column; align-items: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: clamp(1.25rem, 5vw, 2.5rem); gap: 1.5rem;
     }
     header {
       width: 100%; max-width: 560px; display: flex;
       align-items: center; justify-content: space-between;
     }
-    .label { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .label { display: inline-flex; align-items: center; gap: .45em; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .label svg { width: 1.05em; height: 1.05em; }
     .toggle {
       width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
       border: 1px solid var(--border); background: var(--surface); color: var(--text);
@@ -67,7 +68,7 @@
 </head>
 <body>
   <header>
-    <span class="label">Try it →</span>
+    <span class="label">Try it <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     <button id="toggle" class="toggle" aria-label="Toggle theme" title="Toggle theme">
       <svg class="sun-moon" viewBox="0 0 24 24" aria-hidden="true">
         <circle class="disc" cx="12" cy="12" r="5" />
