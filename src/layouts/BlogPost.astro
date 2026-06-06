@@ -36,20 +36,24 @@ const kicker = tags?.[0];
 				</p>
 			)}
 
-			<div class="flex items-center gap-3 mt-7 text-sm text-stone">
-				<FormattedDate date={pubDate} />
-				{updatedDate && (
-					<span class="italic">(updated <FormattedDate date={updatedDate} />)</span>
-				)}
-				{minutesRead && (
-					<>
-						<span class="text-stone-light">·</span>
-						<span>{minutesRead}</span>
-					</>
-				)}
-				<span class="text-stone-light">·</span>
-				<CopyLinkButton client:load />
-				<ReadingFocus client:load />
+			<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-7 text-sm text-stone">
+				<div class="flex items-center gap-3">
+					<FormattedDate date={pubDate} />
+					{updatedDate && (
+						<span class="italic">(updated <FormattedDate date={updatedDate} />)</span>
+					)}
+					{minutesRead && (
+						<>
+							<span class="text-stone-light">·</span>
+							<span>{minutesRead}</span>
+						</>
+					)}
+				</div>
+				<span class="hidden sm:inline text-stone-light">·</span>
+				<div class="flex items-center gap-3">
+					<CopyLinkButton client:load />
+					<ReadingFocus client:load />
+				</div>
 			</div>
 		</header>
 
