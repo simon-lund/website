@@ -40,7 +40,7 @@ const blocks = [...article.querySelectorAll('p, li, h2, h3, pre, img')]
 
 ## The one bug worth mentioning
 
-The little control bar kept coming out greyed — dimmed by the very shadow it was supposed to float above, even though its `z-index` (60) was higher than the scrim's (55). The catch: **`z-index` only ranks elements within the same stacking context.** The bar was rendered deep inside the article, in a context that itself sat *below* the body-level scrim, so its number was competing in the wrong league.
+With focus mode on there's a little control bar at the bottom of the screen — the line counter plus the previous / next / exit buttons. It kept coming out greyed, dimmed by the very shadow it was supposed to float above, even though its `z-index` (60) was higher than the scrim's (55). The catch: **`z-index` only ranks elements within the same stacking context.** The bar was rendered deep inside the article, in a context that itself sat *below* the body-level scrim, so its number was competing in the wrong league.
 
 The fix is to move the bar out to `<body>` so it and the scrim are siblings. In Svelte that's a tiny action:
 

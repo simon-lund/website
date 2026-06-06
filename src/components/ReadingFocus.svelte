@@ -69,6 +69,7 @@
 		const article = document.querySelector('.prose');
 		if (!article) return;
 		article.classList.add('reading-focus');
+		document.documentElement.classList.add('reading-focus-active'); // hides the rocket FAB
 		active = true;
 		// Wait a frame so the looser line spacing applies before we measure.
 		requestAnimationFrame(() => {
@@ -89,6 +90,7 @@
 	function stop() {
 		active = false;
 		document.querySelector('.prose')?.classList.remove('reading-focus');
+		document.documentElement.classList.remove('reading-focus-active');
 		spotlight?.remove();
 		spotlight = null;
 	}

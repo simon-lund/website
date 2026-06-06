@@ -269,6 +269,10 @@ html[data-theme-ripple]::view-transition-new(theme-toggle) {
 .reading-focus :is(p, li, h2, h3, h4, blockquote) {
 	line-height: 2.1;
 }
+/* Hide the scroll-to-top rocket while reading focus is active. */
+.reading-focus-active .rocket-fab {
+	display: none;
+}
 .reading-spotlight {
 	position: absolute;
 	border-radius: 7px;
