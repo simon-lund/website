@@ -82,29 +82,7 @@
 	const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 	onMount(async () => {
-		const sourceImg = await loadSource();
-
-		// Sample the source into PIXEL_GRID^2 averaged colors (once).
-		const gridLen = PIXEL_GRID * PIXEL_GRID;
-		const small = document.createElement('canvas');
-		small.width = PIXEL_GRID;
-		small.height = PIXEL_GRID;
-		const sctx = small.getContext('2d')!;
-		sctx.imageSmoothingEnabled = true;
-		sctx.imageSmoothingQuality = 'high';
-		sctx.drawImage(sourceImg, 0, 0, PIXEL_GRID, PIXEL_GRID);
-		const data = sctx.getImageData(0, 0, PIXEL_GRID, PIXEL_GRID).data;
-
-		const colorStr: (string | null)[] = new Array(gridLen);
-		for (let i = 0; i < gridLen; i++) {
-			const o = i * 4;
-			colorStr[i] = data[o + 3] < 8 ? null : `rgb(${data[o]},${data[o + 1]},${data[o + 2]})`;
-		}
-		const pixDx = new Float32Array(gridLen);
-		const pixDy = new Float32Array(gridLen);
-
-		loaded = true;
-		loadRapier();
+		loaded = true; // show the canvas immediately so we can animate the load
 		await new Promise((r) => requestAnimationFrame(r));
 		if (!canvasEl || !containerEl) return;
 
@@ -130,6 +108,86 @@
 		resizeObserver.observe(containerEl);
 
 		const r2 = RADIUS * scale;
+		const gridLen = PIXEL_GRID * PIXEL_GRID;
+		loadRapier();
+
+		// --- Loading flourish: a warm pixel shimmer that resolves into the portrait ---
+		const cssVars = getComputedStyle(document.documentElement);
+		const hexRgb = (v, fb) => {
+			const m = v.trim().match(/^#?([0-9a-fA-F]{6})$/);
+			if (!m) return fb;
+			const n = parseInt(m[1], 16);
+			return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+		};
+		const cA = hexRgb(cssVars.getPropertyValue('--color-cream-dark'), [240, 235, 228]);
+		const cB = hexRgb(cssVars.getPropertyValue('--color-accent'), [192, 127, 82]);
+		// Wide, soft diagonal bands of warmth flowing across the cream-dark base.
+		const shimmerColor = (gx, gy, t) => {
+			const w = 0.5 + 0.5 * Math.sin((gx + gy) * 0.2 - t * 0.0045);
+			const k = w * w * 0.32;
+			return `rgb(${(cA[0] + (cB[0] - cA[0]) * k) | 0},${(cA[1] + (cB[1] - cA[1]) * k) | 0},${(cA[2] + (cB[2] - cA[2]) * k) | 0})`;
+		};
+
+		let phase = 'loading';
+		function drawShimmer(t) {
+			if (!ctx) return;
+			const cell = size / PIXEL_GRID;
+			ctx.clearRect(0, 0, size, size);
+			for (let gy = 0; gy < PIXEL_GRID; gy++) {
+				for (let gx = 0; gx < PIXEL_GRID; gx++) {
+					ctx.fillStyle = shimmerColor(gx, gy, t);
+					ctx.fillRect(gx * cell, gy * cell, cell + 0.6, cell + 0.6);
+				}
+			}
+			if (phase === 'loading') requestAnimationFrame(drawShimmer);
+		}
+		requestAnimationFrame(drawShimmer);
+
+		// Load + sample the image (the slow part the shimmer is covering).
+		const sourceImg = await loadSource();
+		const small = document.createElement('canvas');
+		small.width = PIXEL_GRID;
+		small.height = PIXEL_GRID;
+		const sctx = small.getContext('2d');
+		sctx.imageSmoothingEnabled = true;
+		sctx.imageSmoothingQuality = 'high';
+		sctx.drawImage(sourceImg, 0, 0, PIXEL_GRID, PIXEL_GRID);
+		const data = sctx.getImageData(0, 0, PIXEL_GRID, PIXEL_GRID).data;
+
+		const colorStr = new Array(gridLen);
+		for (let i = 0; i < gridLen; i++) {
+			const o = i * 4;
+			colorStr[i] = data[o + 3] < 8 ? null : `rgb(${data[o]},${data[o + 1]},${data[o + 2]})`;
+		}
+		const pixDx = new Float32Array(gridLen);
+		const pixDy = new Float32Array(gridLen);
+
+		phase = 'ready';
+
+		// Reveal: a diagonal wave resolves the shimmer into the real pixels.
+		await new Promise((done) => {
+			const start = performance.now();
+			const DUR = 700;
+			const span = 2 * (PIXEL_GRID - 1);
+			function reveal(now) {
+				if (!ctx) { done(); return; }
+				const p = Math.min(1, (now - start) / DUR);
+				const front = p * (span + 10);
+				const cell = size / PIXEL_GRID;
+				ctx.clearRect(0, 0, size, size);
+				for (let gy = 0; gy < PIXEL_GRID; gy++) {
+					for (let gx = 0; gx < PIXEL_GRID; gx++) {
+						const col = gx + gy < front - 4 ? colorStr[gy * PIXEL_GRID + gx] : shimmerColor(gx, gy, now);
+						if (!col) continue;
+						ctx.fillStyle = col;
+						ctx.fillRect(gx * cell, gy * cell, cell + 0.6, cell + 0.6);
+					}
+				}
+				if (p < 1) requestAnimationFrame(reveal);
+				else done();
+			}
+			requestAnimationFrame(reveal);
+		});
 
 		let renderActive = false;
 		function render() {
