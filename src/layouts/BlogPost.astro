@@ -6,9 +6,9 @@ import CopyLinkButton from '../components/CopyLinkButton.svelte';
 import BackButton from '../components/BackButton.svelte';
 import RocketFab from '../components/RocketFab.svelte';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & { minutesRead?: string };
 
-const { title, description, pubDate, updatedDate, tags } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, minutesRead } = Astro.props;
 const kicker = tags?.[0];
 ---
 
@@ -39,6 +39,12 @@ const kicker = tags?.[0];
 				<FormattedDate date={pubDate} />
 				{updatedDate && (
 					<span class="italic">(updated <FormattedDate date={updatedDate} />)</span>
+				)}
+				{minutesRead && (
+					<>
+						<span class="text-stone-light">·</span>
+						<span>{minutesRead}</span>
+					</>
 				)}
 				<span class="text-stone-light">·</span>
 				<CopyLinkButton client:load />
