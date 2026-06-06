@@ -270,8 +270,7 @@ html[data-theme-ripple]::view-transition-new(theme-toggle) {
 .reading-spotlight {
 	position: absolute;
 	border-radius: 7px;
-	box-shadow: 0 0 0 100vmax rgba(22, 20, 17, 0.62);
-	border-bottom: 2px solid var(--color-accent);
+	box-shadow: 0 0 0 9999px rgba(22, 20, 17, 0.62);
 	pointer-events: none;
 	z-index: 55;
 	transition: top 0.16s ease, left 0.16s ease, width 0.16s ease, height 0.16s ease;

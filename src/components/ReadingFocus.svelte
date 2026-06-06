@@ -11,13 +11,30 @@
 	let spotlight: HTMLDivElement | null = null;
 	let resizeRaf = 0;
 
+	function docRect(r: DOMRect): Line {
+		return { top: r.top + window.scrollY, left: r.left + window.scrollX, width: r.width, height: r.height };
+	}
+
 	function collectLines(): Line[] {
 		const container = document.querySelector('.prose');
 		if (!container) return [];
 		const out: Line[] = [];
-		const blocks = container.querySelectorAll('p, li, h2, h3, h4, blockquote');
-		blocks.forEach((el) => {
-			if (el.closest('pre')) return;
+		// Walk text, code and media in document order.
+		const els = container.querySelectorAll('p, li, h2, h3, h4, pre, img, iframe, video');
+		els.forEach((el) => {
+			// Images, embeds and code blocks get a single stop on the whole element
+			// (per-line focus is invisible on a dark code background).
+			if (el.matches('img, iframe, video, pre')) {
+				const r = el.getBoundingClientRect();
+				if (r.width > 8 && r.height > 8) out.push(docRect(r));
+				return;
+			}
+			// Skip a paragraph that only wraps a media element (handled above), and
+			// nested paragraphs inside list items (the <li> already covers them).
+			if (el.tagName === 'P' && !el.textContent?.trim() && el.querySelector('img, iframe, video')) return;
+			if (el.tagName === 'P' && el.closest('li')) return;
+
+			// Text and code blocks step one visual line at a time.
 			const range = document.createRange();
 			range.selectNodeContents(el);
 			const rects = Array.from(range.getClientRects()).filter((r) => r.width > 2 && r.height > 6);
@@ -144,22 +161,22 @@
 
 {#if active}
 	<div
-		class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 rounded-full
-			border border-stone-light/30 bg-cream/95 backdrop-blur px-2 py-1.5 shadow-lg text-stone"
+		class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1.5 rounded-full
+			border border-ink/10 bg-cream px-3 py-2 text-ink shadow-2xl ring-1 ring-black/10"
 		role="toolbar"
 		aria-label="Reading focus controls"
 	>
-		<button onclick={() => move(-1)} class="p-1.5 rounded-full hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Previous line">
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6" /></svg>
+		<button onclick={() => move(-1)} class="p-2 rounded-full text-ink hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Previous line">
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6" /></svg>
 		</button>
-		<span class="px-1.5 text-xs tabular-nums select-none">{idx + 1} / {count}</span>
-		<button onclick={() => move(1)} class="p-1.5 rounded-full hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Next line">
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+		<span class="px-1.5 text-sm font-semibold tabular-nums select-none">{idx + 1} / {count}</span>
+		<button onclick={() => move(1)} class="p-2 rounded-full text-ink hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Next line">
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
 		</button>
-		<span class="mx-1 h-4 w-px bg-stone-light/40"></span>
-		<span class="px-1 text-xs select-none hidden sm:inline">↑ ↓ · Space</span>
-		<button onclick={stop} class="p-1.5 rounded-full hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Exit focus mode">
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+		<span class="mx-1 h-5 w-px bg-ink/15"></span>
+		<span class="px-1 text-xs text-stone select-none hidden sm:inline">↑ ↓ · Space · Esc</span>
+		<button onclick={stop} class="p-2 rounded-full text-ink hover:text-accent hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Exit focus mode">
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
 		</button>
 	</div>
 {/if}
