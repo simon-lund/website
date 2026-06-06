@@ -33,17 +33,13 @@
       width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
       border: 1px solid var(--border); background: var(--surface); color: var(--text);
       cursor: pointer; transition: border-color .2s ease, transform .15s ease;
-      view-transition-name: toggle;
     }
     .toggle:hover { border-color: var(--accent); }
     .toggle:active { transform: scale(.93); }
-    .sun-moon { width: 20px; height: 20px; overflow: visible; transition: transform .6s cubic-bezier(.34,1.56,.64,1); }
-    [data-theme="dark"] .sun-moon { transform: rotate(-130deg); }
-    .sun-moon .disc { fill: currentColor; }
-    .sun-moon .cut { fill: var(--surface); transform: translate(11px,-11px); transition: transform .6s cubic-bezier(.4,0,.2,1); }
-    [data-theme="dark"] .sun-moon .cut { transform: translate(4px,-3px); }
-    .sun-moon .rays { stroke: currentColor; stroke-width: 2; stroke-linecap: round; transform-box: fill-box; transform-origin: center; transition: transform .5s cubic-bezier(.4,0,.2,1), opacity .35s ease; }
-    [data-theme="dark"] .sun-moon .rays { transform: scale(.35); opacity: 0; }
+    /* the icon rides above the ripple in its own snapshot, so it can spin */
+    .icon { display: inline-flex; view-transition-name: toggle; }
+    .icon svg { width: 20px; height: 20px; }
+
     main { width: 100%; max-width: 560px; }
     .card {
       background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
@@ -58,11 +54,17 @@
     ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
     ::view-transition-new(root) { z-index: 1; }
     ::view-transition-old(root) { z-index: 0; }
+
+    /* the icon spins out / in on top of the wave */
     ::view-transition-group(toggle) { z-index: 2; }
+    ::view-transition-old(toggle) { animation: icon-out .5s cubic-bezier(.4,0,.2,1) forwards; }
+    ::view-transition-new(toggle) { animation: icon-in .5s cubic-bezier(.34,1.56,.64,1) forwards; }
+    @keyframes icon-out { to { transform: rotate(150deg) scale(.3); opacity: 0; } }
+    @keyframes icon-in { from { transform: rotate(-150deg) scale(.3); opacity: 0; } }
 
     @media (prefers-reduced-motion: reduce) {
-      .sun-moon, .sun-moon * { transition: none !important; }
-      ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
+      ::view-transition-old(root), ::view-transition-new(root),
+      ::view-transition-old(toggle), ::view-transition-new(toggle) { animation: none !important; }
     }
   </style>
 </head>
@@ -70,16 +72,7 @@
   <header>
     <span class="label">Try it <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     <button id="toggle" class="toggle" aria-label="Toggle theme" title="Toggle theme">
-      <svg class="sun-moon" viewBox="0 0 24 24" aria-hidden="true">
-        <circle class="disc" cx="12" cy="12" r="5" />
-        <circle class="cut" cx="12" cy="12" r="5" />
-        <g class="rays">
-          <line x1="19.5" y1="12" x2="21.5" y2="12" /><line x1="17.3" y1="17.3" x2="18.72" y2="18.72" />
-          <line x1="12" y1="19.5" x2="12" y2="21.5" /><line x1="6.7" y1="17.3" x2="5.28" y2="18.72" />
-          <line x1="4.5" y1="12" x2="2.5" y2="12" /><line x1="6.7" y1="6.7" x2="5.28" y2="5.28" />
-          <line x1="12" y1="4.5" x2="12" y2="2.5" /><line x1="17.3" y1="6.7" x2="18.72" y2="5.28" />
-        </g>
-      </svg>
+      <span class="icon" id="icon"></span>
     </button>
   </header>
   <main>
@@ -91,9 +84,20 @@
   </main>
 
   <script>
+    // Lucide sun & moon (same icons as the site's toggle)
+    const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+    const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+
     const toggle = document.getElementById("toggle");
+    const icon = document.getElementById("icon");
     const root = document.documentElement;
-    const swap = () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; };
+    const renderIcon = () => { icon.innerHTML = root.dataset.theme === "dark" ? SUN : MOON; };
+    renderIcon();
+
+    const swap = () => {
+      root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+      renderIcon();
+    };
 
     toggle.addEventListener("click", (e) => {
       const r = e.currentTarget.getBoundingClientRect();
