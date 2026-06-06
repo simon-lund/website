@@ -22,6 +22,18 @@
 	let activePath = $state(currentPath);
 	let navBgPath = $state(currentPath);
 	let mobileOpen = $state(false);
+	let scrolled = $state(false);
+
+	// Mobile pills reuse the desktop bar's look: page-coloured background, a
+	// hairline border, and a soft shadow that lifts in once you scroll.
+	const INK_BORDER = 'color-mix(in srgb, var(--color-ink) 12%, transparent)';
+	const LIFT_SHADOW = '0 4px 12px color-mix(in srgb, var(--color-ink) 8%, transparent)';
+	let chipStyle = $derived(
+		`background-color: var(--color-${navBgPath === '/' ? 'cream-dark' : 'cream'}); ` +
+		`border: 0.5px solid ${scrolled ? INK_BORDER : 'transparent'}; ` +
+		`box-shadow: ${scrolled ? LIFT_SHADOW : 'none'}; ` +
+		`transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;`
+	);
 
 	function getActiveIndex(path: string): number {
 		const idx = links.findIndex(
@@ -81,11 +93,10 @@
 	}
 
 	function updateScrollStyles() {
+		scrolled = window.scrollY > 20;
 		if (!navContainerEl) return;
-		const scrolled = window.scrollY > 20;
-
-		navContainerEl.style.boxShadow = scrolled ? '0 4px 12px color-mix(in srgb, var(--color-ink) 8%, transparent)' : 'none';
-		navContainerEl.style.borderColor = scrolled ? 'color-mix(in srgb, var(--color-ink) 12%, transparent)' : 'transparent';
+		navContainerEl.style.boxShadow = scrolled ? LIFT_SHADOW : 'none';
+		navContainerEl.style.borderColor = scrolled ? INK_BORDER : 'transparent';
 	}
 
 	function toggleMobile() {
@@ -186,13 +197,15 @@
 	<a
 		href="/"
 		onclick={closeMobile}
-		class="text-sm font-semibold text-ink px-3 py-1.5 rounded-full bg-cream/80 backdrop-blur-md border border-ink/5 shadow-sm cursor-pointer"
+		class="text-sm font-semibold text-ink px-3 py-1.5 rounded-full cursor-pointer"
+		style={chipStyle}
 	>
 		Simon Lund
 	</a>
 	<button
 		onclick={toggleMobile}
-		class="grid place-items-center w-10 h-10 rounded-full bg-cream/80 backdrop-blur-md border border-ink/5 shadow-sm cursor-pointer"
+		class="grid place-items-center w-10 h-10 rounded-full cursor-pointer"
+		style={chipStyle}
 		aria-label="Toggle menu"
 		aria-expanded={mobileOpen}
 	>
@@ -212,8 +225,11 @@
 
 <!-- Mobile overlay -->
 {#if mobileOpen}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		transition:fade={{ duration: 200 }}
+		onclick={closeMobile}
 		class="fixed inset-0 z-40 flex flex-col md:hidden"
 		style="background-color: var(--color-{navBgPath === '/' ? 'cream-dark' : 'cream'});"
 	>
@@ -242,7 +258,9 @@
 			{/each}
 		</div>
 
-		<div class="flex justify-center pb-8">
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="flex justify-center pb-8" onclick={(e) => e.stopPropagation()}>
 			<ThemeToggle />
 		</div>
 	</div>
