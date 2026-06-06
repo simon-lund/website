@@ -67,14 +67,8 @@
 				gsap.killTweensOf(flame);
 				const out = gsap.timeline({ onComplete: reset });
 				out.to(flame, { scaleY: 2.6, opacity: 1, duration: 0.16, ease: 'power1.in' }, 0);
-				// curve up and to the right (the mid keyframe bends the path), banking as it goes
-				out.to(fabEl, {
-					keyframes: [
-						{ x: 30, y: -(vh * 0.92), rotation: 9, duration: 0.22, ease: 'power1.in' },
-						{ x: 180, y: -(vh + 240), rotation: 30, duration: 0.32, ease: 'power2.in' }
-					]
-				}, 0);
-				out.to(fabEl, { opacity: 0, duration: 0.32, ease: 'power1.in' }, 0.24);
+				out.to(fabEl, { y: -(vh + 200), duration: 0.5, ease: 'power2.in' }, 0);
+				out.to(fabEl, { opacity: 0, duration: 0.3, ease: 'power1.in' }, 0.24);
 			} else {
 				rafId = requestAnimationFrame(watch);
 			}
