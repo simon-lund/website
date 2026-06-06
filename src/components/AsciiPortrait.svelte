@@ -446,9 +446,26 @@
 		}
 
 		const el = containerEl;
-		const onTouchStart = (e: TouchEvent) => { e.preventDefault(); handleTouchStart(e); };
-		const onTouchMove = (e: TouchEvent) => { e.preventDefault(); handleTouchMove(e); };
-		const onTouchEnd = () => handleLeave();
+		// On touch, preventDefault() suppresses the synthesized click, so detect a
+		// tap ourselves: a touch that ends without dragging shatters (like a click),
+		// while a drag just warps the pixels.
+		let tapX = 0, tapY = 0, tapMoved = false;
+		const onTouchStart = (e: TouchEvent) => {
+			e.preventDefault();
+			const t = e.touches[0];
+			if (t) { tapX = t.clientX; tapY = t.clientY; tapMoved = false; }
+			handleTouchStart(e);
+		};
+		const onTouchMove = (e: TouchEvent) => {
+			e.preventDefault();
+			const t = e.touches[0];
+			if (t && (Math.abs(t.clientX - tapX) > 8 || Math.abs(t.clientY - tapY) > 8)) tapMoved = true;
+			handleTouchMove(e);
+		};
+		const onTouchEnd = () => {
+			handleLeave();
+			if (!tapMoved) explode();
+		};
 		const onClick = () => { explode(); };
 		el.addEventListener('touchstart', onTouchStart, { passive: false });
 		el.addEventListener('touchmove', onTouchMove, { passive: false });
