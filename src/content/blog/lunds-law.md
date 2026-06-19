@@ -5,7 +5,12 @@ pubDate: 'Jun 07 2026'
 tags: ['Laws']
 ---
 
-I have a soft spot for laws that are one sentence long and annoyingly true. Hyrum's Law: with enough users, every observable behaviour of your system becomes something someone depends on, no matter what you promised. Goodhart's Law: when a measure becomes a target, it stops being a good measure. You read them once and they rearrange how you see things. No proof, no math, just a line you cannot un-see.
+I have a soft spot for laws that are one sentence long and annoyingly true.
+
+- **Hyrum's Law:** with enough users, every observable behaviour of your system becomes something someone depends on, no matter what you promised.
+- **Goodhart's Law:** when a measure becomes a target, it stops being a good measure.
+
+You read them once and they rearrange how you see things. No proof, no math, just a line you cannot un-see.
 
 Here is the one I keep coming back to.
 
