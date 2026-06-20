@@ -14,17 +14,16 @@ const kicker = tags?.[0];
 ---
 
 <BaseLayout title={title} description={description} noindex={draft}>
+	{draft && (
+		<div slot="banner" class="w-full bg-accent text-white text-center text-sm font-medium px-4 py-2.5">
+			Draft preview · this post is not published yet
+		</div>
+	)}
 	<article class="max-w-2xl mx-auto px-4 pt-20 pb-16">
 		<header class="mb-12">
 			<div class="mb-8">
 				<BackButton client:load />
 			</div>
-
-			{draft && (
-				<div class="mb-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white">
-					Draft
-				</div>
-			)}
 
 			{kicker && (
 				<span class="inline-block text-xs font-semibold uppercase tracking-[0.08em] text-accent mb-4">

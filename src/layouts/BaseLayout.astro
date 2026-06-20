@@ -21,6 +21,7 @@ const currentPath = Astro.url.pathname;
 		<ClientRouter />
 	</head>
 	<body class="bg-cream text-ink min-h-screen flex flex-col">
+		<slot name="banner" />
 		<div class="sticky top-0 z-50" transition:persist="nav">
 			<Nav
 				client:load
