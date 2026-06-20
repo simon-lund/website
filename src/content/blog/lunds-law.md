@@ -3,6 +3,7 @@ title: "Lund's Law"
 description: 'A small law about why thinking you are exempt is the very thing that catches you, and the joke that justifies putting my name on it.'
 pubDate: 'Jun 07 2026'
 tags: ['Laws']
+draft: true
 ---
 
 I have a soft spot for laws that are one sentence long and annoyingly true.
