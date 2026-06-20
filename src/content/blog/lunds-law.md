@@ -1,52 +1,31 @@
 ---
-title: "Lund's Law"
-description: 'A small law about why thinking you are exempt is the very thing that catches you, and the joke that justifies putting my name on it.'
+title: "You are never the exception you think you are"
+description: 'You did not skip the enum out of ignorance. You skipped it because you were sure your field was different. The danger is rarely not knowing the rule, it is being sure it does not apply to you.'
 pubDate: 'Jun 07 2026'
 tags: ['Laws']
 draft: true
 ---
 
-I have a soft spot for laws that are one sentence long and annoyingly true.
+This is a rule I keep relearning, usually right after deciding it does not apply to me. The cleanest example I know is a database column.
 
-- **Hyrum's Law:** with enough users, every observable behaviour of your system becomes something someone depends on, no matter what you promised.
-- **Goodhart's Law:** when a measure becomes a target, it stops being a good measure.
+You are adding a `status` field. An enum feels like overkill: the values are obvious, the feature is small, free text is flexible. So you ship a plain string. It is your field, you know what goes in it.
 
-You read them once and they rearrange how you see things. No proof, no math, just a line you cannot un-see. Before I get to mine, here is one in the wild.
+Then it grows. `active`, `Active`, `ACTIVE`, `actv`, one with a trailing space. Code in five places branches on the spelling, a dashboard groups by it, and someone finally writes a migration to tidy it up and breaks a report that quietly depended on the typo. You have an enum after all, just the worst possible one: undocumented, inconsistent, and unfixable because the mess is now load-bearing.
 
-## Start with a string
+The thing is, you knew about enums. You did not skip the constraint out of ignorance. You skipped it because you were sure *this* field was different. It would stay clean. It did not need the discipline other people's fields need.
 
-You add a `status` field. An enum feels like overkill, free text is flexible, so you ship a plain string. It works.
+That is the actual rule, and it is much bigger than databases:
 
-Then it grows. The values drift in: `active`, `Active`, `ACTIVE`, `actv`, one with a trailing space. Code all over the place starts branching on them. Reports group by them. A migration tries to tidy them up and breaks something that quietly relied on the typo.
+> The danger is rarely not knowing the rule. It is being sure it does not apply to you.
 
-Congratulations, you have an enum. The worst possible one: undocumented, inconsistent, unvalidated, and impossible to change because something now depends on every accidental spelling. There is even a name for the smell, *stringly typed*. So:
+And the certainty is not a harmless misjudgement sitting next to the outcome. It is the cause of it. Believing you are the exception is exactly what talks you out of the enum, the test, the backup, the second opinion. The rule does not catch you despite your confidence. It catches you *through* it.
 
-> Every free-text field is an enum that has not admitted it yet.
+You see it most clearly in people who can recite the rule and exempt themselves anyway:
 
-Which is really Hyrum's Law in different clothes: once a value can be observed, someone depends on it.
+- The engineer who can quote Hyrum's Law, that with enough users every observable behaviour of your system becomes something someone depends on, and ships the leaky behaviour regardless, because surely no one will rely on *that*.
+- The manager who knows Goodhart's Law, that a measure under pressure stops being a good measure, and targets the number anyway, because *their* team would never game it.
+- Every bubble, where "this time is different" is not said by people who have never heard of bubbles. It is said by people who have, and have decided they are the one that lasts.
 
-And notice the thing that talked you into free text in the first place. Postel's Law, *be liberal in what you accept*, is not actually a law. It is a suggestion phrased as an instruction, which you were free to take or ignore. That is the tell. The laws I care about are not advice. They do not need your cooperation and they do not accept your refusal. Postel's you can skip. The enum waits for you anyway.
+The pattern is ancient. The law settled it two thousand years ago with *ignorantia juris non excusat*, ignorance excuses no one. The Greeks knew the sharper half: hubris invites nemesis. It is not the ignorant who get the hard lessons, it is the confident. Agreeing with a rule in general costs nothing. The whole game is the single case you wave off as special, because that is the one case you stop defending.
 
-## A word on names
-
-You may have noticed I keep bolting surnames onto sentences. Is it not a bit much to coin a law and sign it?
-
-> **Lund's Second Law.** Every law's name eventually converges on its author.
-
-This has a famous cousin, Stigler's Law of Eponymy: no scientific discovery is named after its original discoverer. The perfect part, the part that made me want to write any of this down, is that Stephen Stigler named that law and then credited the sociologist Robert Merton as its real discoverer. It demonstrates itself in the act of being stated. Hyrum's Law does the same from the other side: Titus Winters coined the phrase and put Hyrum Wright's name on it, not his own. A law's name is not a claim of ownership. It is a label, and labels drift to whoever says them best.
-
-## The law underneath
-
-So, back to the string. Why did you skip the enum? Not ignorance. You knew enums existed. You filed *this* field under "exception": mine is different, it will stay clean, it does not need constraining. It is the same move as the engineer who has read Hyrum's Law and ships the undocumented behaviour anyway, and the manager who can quote Goodhart and targets the metric anyway. Everyone agrees with the law in general and exempts themselves in particular.
-
-That is the law under all the others:
-
-> **Lund's First Law.** Believing a law does not apply to you is not evidence of exemption. It is usually the reason it will.
-
-The important word is *reason*. This is not just "you underestimate your risk," which is plain optimism bias and already has a name. The claim is sharper: the belief is not a mistake sitting next to the outcome, it is the cause of it. Thinking you are exempt is exactly what talks you out of the enum, the docs, the constraint that would have saved you. The law catches you *through* your confidence.
-
-It has a long family. The legal version is two thousand years old: *ignorantia juris non excusat*, ignorance of the law excuses no one. The Greeks had the causal half, where hubris invites nemesis and pride goes before the fall. Finance has the temporal one, "this time is different," which Reinhart and Rogoff put on a book cover and which Templeton called the four most dangerous words in investing. None of them is quite the general thing, which is the whole reason to give it a name.
-
-And putting my name on it is not arrogance, it is a controlled experiment. If the First Law is any good it will outlast my claim to it, and the name will drift off to whoever says it best. If it is not, this page is the only place it ever appears, which is its own kind of proof.
-
-Either way: do not file yourself under "exception." That is the one move the law is watching for.
+So when you next reach for "mine is different, just this once", treat the feeling of being exempt as what it actually is. Not evidence. Usually the tell. Use the enum.
