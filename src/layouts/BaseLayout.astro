@@ -8,15 +8,16 @@ interface Props {
 	title: string;
 	description: string;
 	image?: ImageMetadata;
+	noindex?: boolean;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, noindex } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} image={image} />
+		<BaseHead title={title} description={description} image={image} noindex={noindex} />
 		<ClientRouter />
 	</head>
 	<body class="bg-cream text-ink min-h-screen flex flex-col">

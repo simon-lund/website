@@ -9,16 +9,22 @@ import RocketFab from '../components/RocketFab.svelte';
 
 type Props = CollectionEntry<'blog'>['data'] & { minutesRead?: string };
 
-const { title, description, pubDate, updatedDate, tags, minutesRead } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, minutesRead, draft } = Astro.props;
 const kicker = tags?.[0];
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} noindex={draft}>
 	<article class="max-w-2xl mx-auto px-4 pt-20 pb-16">
 		<header class="mb-12">
 			<div class="mb-8">
 				<BackButton client:load />
 			</div>
+
+			{draft && (
+				<div class="mb-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white">
+					Draft
+				</div>
+			)}
 
 			{kicker && (
 				<span class="inline-block text-xs font-semibold uppercase tracking-[0.08em] text-accent mb-4">
