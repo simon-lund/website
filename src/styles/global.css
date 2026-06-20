@@ -286,3 +286,15 @@ html[data-theme-ripple]::view-transition-new(theme-toggle) {
 		transition: none;
 	}
 }
+
+/* Reader's chosen body font (FontPicker), applied to the article body only.
+   Code keeps monospace via the UA stylesheet on pre/code. */
+html[data-reading-font='atkinson'] .prose {
+	font-family: var(--font-atkinson);
+}
+html[data-reading-font='lexend'] .prose {
+	font-family: var(--font-lexend);
+}
+html[data-reading-font='serif'] .prose {
+	font-family: var(--font-literata);
+}

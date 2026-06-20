@@ -41,5 +41,24 @@ export default defineConfig({
 			cssVariable: '--font-body',
 			fallbacks: ['system-ui', 'sans-serif'],
 		},
+		// Reader-selectable body fonts (FontPicker). Only downloaded when chosen.
+		{
+			provider: fontProviders.google(),
+			name: 'Atkinson Hyperlegible',
+			cssVariable: '--font-atkinson',
+			fallbacks: ['system-ui', 'sans-serif'],
+		},
+		{
+			provider: fontProviders.google(),
+			name: 'Lexend',
+			cssVariable: '--font-lexend',
+			fallbacks: ['system-ui', 'sans-serif'],
+		},
+		{
+			provider: fontProviders.google(),
+			name: 'Literata',
+			cssVariable: '--font-literata',
+			fallbacks: ['Georgia', 'serif'],
+		},
 	],
 });

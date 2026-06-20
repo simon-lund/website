@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { SITE_TITLE } from '../consts';
+import { Font } from 'astro:assets';
 
 interface Props {
 	title: string;
@@ -20,6 +21,12 @@ const pageTitle = title === SITE_TITLE ? title : `${title} | ${SITE_TITLE}`;
 <meta name="generator" content={Astro.generator} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
+<!-- Reader-selectable fonts (FontPicker). @font-face declared here; the woff2
+	only downloads when a reader actually picks the font. -->
+<Font cssVariable="--font-atkinson" />
+<Font cssVariable="--font-lexend" />
+<Font cssVariable="--font-literata" />
+
 <script is:inline>
 	(function() {
 		function applyTheme() {
@@ -34,6 +41,8 @@ const pageTitle = title === SITE_TITLE ? title : `${title} | ${SITE_TITLE}`;
 			if (icon) icon.href = isDark ? '/favicon.svg' : '/favicon-light.svg';
 		}
 		applyTheme();
+		var rf = localStorage.getItem('reading-font');
+		if (rf) document.documentElement.setAttribute('data-reading-font', rf);
 		document.addEventListener('astro:after-swap', applyTheme);
 	})();
 </script>
