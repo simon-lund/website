@@ -17,8 +17,8 @@
 	<p class="text-lg text-ink-light leading-relaxed mb-4">
 		I'm a software engineer with many hats 🧙: UX, design, backend, devops. Working across all of them is what taught me to appreciate <a href="https://boringtechnology.club/" target="_blank" rel="noopener noreferrer">boring technology</a>.
 	</p>
-	<p class="text-lg text-stone">
-		I write about where AI should live, what makes it useful, and what makes it trustworthy.
+	<p class="text-lg text-ink-light leading-relaxed">
+		I write about software, design, and the occasional idea I can't let go of.
 	</p>
 {/snippet}
 
