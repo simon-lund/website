@@ -10,11 +10,11 @@ This is a rule I keep relearning, usually right after deciding it does not apply
 
 You are adding a `status` field. An enum feels like overkill: the values are obvious, the feature is small, free text is flexible. So you ship a plain string. It is your field, you know what goes in it.
 
-An enum is a contract. It says these are the values, all of them, and everyone who touches the field can rely on that.
+For a while, you do. Then other code starts writing to it. One service writes `active`, another `Active`, a form posts `ACTIVE`, an old job still writes `actv`. Nothing rejects any of it, because a plain string never promised anything to reject against. The smell even has a name: *stringly typed*.
 
-A string promises nothing. Reaching for one where a type belongs even has a name, *stringly typed*, and the drift starts at once: one service writes `active`, another `Active`, a form posts `ACTIVE`, an old job still writes `actv`. Nothing rejects any of it, because there was never a rule to reject against.
+Then the bill arrives. You want to show the status in the UI, translated, and the translation layer needs a fixed set of keys to map `active` onto `Aktiv` and `Activo`. It cannot translate a value nobody declared. Reporting groups by status and silently splits one state into four. Someone writes a migration to normalise the mess and breaks a report that quietly depended on a typo.
 
-Then the bill arrives. You want to show the status in the UI, translated, and the translation layer needs a fixed set of keys to map `active` onto `Aktiv` and `Activo`. It cannot translate a value nobody declared. Reporting groups by status and silently splits one state into four. Someone writes a migration to normalise the mess and breaks a report that quietly depended on a typo. You have an enum after all, just the worst one: undocumented, inconsistent, and stuck that way.
+So you have an enum after all, just the worst one: undocumented, inconsistent, and stuck that way. The enum would have given you a contract: a fixed set of values, declared once, that everyone can rely on. The string promised nothing, so nothing held.
 
 You knew about enums. You did not skip the contract out of ignorance. You skipped it because you were sure *this* field was different. It would stay clean. It did not need the discipline other people's fields need.
 
