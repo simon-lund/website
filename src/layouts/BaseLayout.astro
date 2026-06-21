@@ -9,15 +9,17 @@ interface Props {
 	description: string;
 	image?: ImageMetadata;
 	noindex?: boolean;
+	ogType?: 'website' | 'article';
+	publishedDate?: Date;
 }
 
-const { title, description, image, noindex } = Astro.props;
+const { title, description, image, noindex, ogType, publishedDate } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} image={image} noindex={noindex} />
+		<BaseHead title={title} description={description} image={image} noindex={noindex} ogType={ogType} publishedDate={publishedDate} />
 		<ClientRouter />
 	</head>
 	<body class="bg-cream text-ink min-h-screen flex flex-col">

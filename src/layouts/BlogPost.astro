@@ -14,7 +14,7 @@ const { title, description, pubDate, updatedDate, tags, minutesRead, draft } = A
 const kicker = tags?.[0];
 ---
 
-<BaseLayout title={title} description={description} noindex={draft}>
+<BaseLayout title={title} description={description} noindex={draft} ogType="article" publishedDate={pubDate}>
 	{draft && (
 		<div slot="banner" class="w-full bg-accent text-white text-center text-sm font-medium px-4 py-2.5">
 			Draft preview · this post is not published yet
