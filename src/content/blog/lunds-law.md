@@ -1,9 +1,8 @@
 ---
 title: "You are never the exception you think you are"
 description: 'You did not skip the enum out of ignorance. You skipped it because you were sure your field was different. The danger is rarely not knowing the rule, it is being sure it does not apply to you.'
-pubDate: 'Jun 07 2026'
+pubDate: 'Jun 21 2026'
 tags: ['Laws']
-draft: true
 ---
 
 This is a rule I keep relearning, usually right after deciding it does not apply to me. The cleanest example I know is a database column.
