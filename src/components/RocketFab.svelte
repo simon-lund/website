@@ -95,7 +95,7 @@
 		bg-accent text-white shadow-lg
 		flex items-center justify-center cursor-pointer will-change-transform"
 	aria-label="Scroll to top"
-	style="transform-origin: center center;"
+	style="transform-origin: center center; opacity: 0; transform: scale(0);"
 >
 	<span class="rocket-bob">
 		<Rocket size={20} class="rotate-[-45deg]" />
