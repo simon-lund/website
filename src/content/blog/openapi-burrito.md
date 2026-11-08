@@ -37,29 +37,27 @@ client.GET("/pet/{petId}", { params: { path: { petId: 1 } } })
 
 In Python it's just `pet_id=1`. The client knows whether each argument belongs in the path, query, header or cookie. Names become snake_case on your side, and the client sends the API's own names: `include_owner=True` goes out as `includeOwner=true`. Python also has both sync and async HTTP, so you can generate either client, or both, from the same spec.
 
-## Security
-
-To prevent code injection, I cross-checked known CVEs in other generators. A generator turns text from a spec into code, so a malicious spec can end up as code in the generated client, as in [CVE-2020-15142](https://github.com/advisories/GHSA-9x4c-63pf-525f). Here, identifiers go through one sanitizer, literals go through `repr()`, and property tests throw arbitrary strings at both.
-
-## Examples
-
-The repo has examples for [ArtifactsMMO](https://github.com/simon-lund/openapi-burrito/tree/main/examples/artifactsmmo) and the [Petstore](https://github.com/simon-lund/openapi-burrito/tree/main/examples/petstore). I also tested it on big real-world specs: the GitHub API (1,272 operations) generates in about 20 seconds and passes `mypy --strict` and pyright, and Stripe (612 operations) passes `mypy --strict`.
-
-## Other generators
-
-- **[openapi-python-client](https://github.com/openapi-generators/openapi-python-client)** generates model classes with (de)serialization code. That's more runtime machinery, and you call one function per operation instead of a path.
-- **[openapi-generator](https://github.com/OpenAPITools/openapi-generator)** is Java-based, supports many languages and has heavier output.
-- **[datamodel-code-generator](https://github.com/datamodel-code-generator/datamodel-code-generator)** is great for models, but it doesn't generate a client.
-
 ## Try it
 
-It's for anyone who calls an OpenAPI-described API from Python and wants types without extra runtime dependencies. Feel free to try it and experiment with it. It works and it's well tested, but it's version 0.2 and I'm not sure it's production-ready yet. If you throw your own spec at it, tell me where it breaks.
+The code is [on GitHub](https://github.com/simon-lund/openapi-burrito), MIT-licensed, with examples for [ArtifactsMMO](https://github.com/simon-lund/openapi-burrito/tree/main/examples/artifactsmmo) and the [Petstore](https://github.com/simon-lund/openapi-burrito/tree/main/examples/petstore). I also tested it on big real-world specs: the GitHub API (1,272 operations) generates in about 20 seconds and passes `mypy --strict` and pyright, and Stripe (612 operations) passes `mypy --strict`.
 
-Known gaps: no discriminator handling (you get the plain union), an inline `allOf` of several schemas becomes `Any`, and Swagger 2.0 specs need converting first (`npx swagger2openapi`).
+Try it with your own OpenAPI spec if you call an API from Python and want types without extra runtime dependencies:
 
 ```bash
 uv tool install openapi-burrito
 openapi-burrito generate openapi.json -o my_client
 ```
 
-The code is [on GitHub](https://github.com/simon-lund/openapi-burrito), MIT-licensed.
+Known gaps: no discriminator handling (you get the plain union), an inline `allOf` of several schemas becomes `Any`, and Swagger 2.0 specs need converting first (`npx swagger2openapi`).
+
+It works and it's well tested, but it's version 0.2 and I'm not sure it's production-ready yet. If it breaks on your spec, tell me where.
+
+## Security
+
+To prevent code injection, I cross-checked known CVEs in other generators. A generator turns text from a spec into code, so a malicious spec can end up as code in the generated client, as in [CVE-2020-15142](https://github.com/advisories/GHSA-9x4c-63pf-525f). To mitigate this in openapi-burrito, identifiers go through one sanitizer, literals go through `repr()`, and property tests throw arbitrary strings at both.
+
+## Other generators
+
+- **[openapi-python-client](https://github.com/openapi-generators/openapi-python-client)** generates model classes with (de)serialization code. That's more runtime machinery, and you call one function per operation instead of a path.
+- **[openapi-generator](https://github.com/OpenAPITools/openapi-generator)** is Java-based, supports many languages and has heavier output.
+- **[datamodel-code-generator](https://github.com/datamodel-code-generator/datamodel-code-generator)** is great for models, but it doesn't generate a client.
