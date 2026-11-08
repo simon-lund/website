@@ -17,8 +17,9 @@ function remarkReadingTime() {
 }
 
 export default defineConfig({
-	site: 'https://simon-lund.de',
-	integrations: [mdx(), sitemap(), svelte()],
+	site: 'https://simon-lund.com',
+	// Unlisted pages under /work/ stay out of the sitemap.
+	integrations: [mdx(), sitemap({ filter: (page) => !page.includes('/work/') }), svelte()],
 	vite: {
 		plugins: [tailwindcss()],
 	},
