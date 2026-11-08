@@ -41,16 +41,18 @@ In Python it's just `pet_id=1`. The client knows whether each argument belongs i
 
 The code is [on GitHub](https://github.com/simon-lund/openapi-burrito), MIT-licensed, with examples for [ArtifactsMMO](https://github.com/simon-lund/openapi-burrito/tree/main/examples/artifactsmmo) and the [Petstore](https://github.com/simon-lund/openapi-burrito/tree/main/examples/petstore). I also tested it on big real-world specs: the GitHub API (1,272 operations) generates in about 20 seconds and passes `mypy --strict` and pyright, and Stripe (612 operations) passes `mypy --strict`.
 
-Try it with your own OpenAPI spec if you call an API from Python and want types without extra runtime dependencies:
+Try it with your own OpenAPI spec if you call an API from Python and want types without extra runtime dependencies. It works and it's well tested, but it's version 0.2 and I'm not sure it's production-ready yet. If it breaks on your spec, tell me where.
 
 ```bash
 uv tool install openapi-burrito
 openapi-burrito generate openapi.json -o my_client
 ```
 
-Known gaps: no discriminator handling (you get the plain union), an inline `allOf` of several schemas becomes `Any`, and Swagger 2.0 specs need converting first (`npx swagger2openapi`).
+Known gaps:
 
-It works and it's well tested, but it's version 0.2 and I'm not sure it's production-ready yet. If it breaks on your spec, tell me where.
+- No discriminator handling (you get the plain union).
+- An inline `allOf` of several schemas becomes `Any`.
+- Swagger 2.0 specs need converting first (`npx swagger2openapi`).
 
 ## Security
 
