@@ -7,7 +7,7 @@ tags: ['Python', 'API Design']
 
 At the start of this year I was building a client for [ArtifactsMMO](https://artifactsmmo.com), a game you play through its API. I wanted a generated client, but a lightweight one. In TypeScript, [openapi-typescript and openapi-fetch](https://openapi-ts.dev/) do exactly that, and I wanted the same for Python.
 
-I wasn't able to finish openapi-burrito right when I started, because I got busy. However, I've now taken the time to finish it, with the help of AI (Claude Code).
+**Disclaimer:** I wasn't able to finish openapi-burrito right when I started, because I got busy. However, I've now taken the time to finish it, with the help of AI (Claude Code).
 
 ## What it does
 
