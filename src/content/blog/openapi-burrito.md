@@ -41,7 +41,7 @@ In Python it's just `pet_id=1`. The client knows whether each argument belongs i
 
 The code is [on GitHub](https://github.com/simon-lund/openapi-burrito), MIT-licensed, with examples for [ArtifactsMMO](https://github.com/simon-lund/openapi-burrito/tree/main/examples/artifactsmmo) and the [Petstore](https://github.com/simon-lund/openapi-burrito/tree/main/examples/petstore). I also tested it on big real-world specs: the GitHub API (1,272 operations) generates in about 20 seconds and passes `mypy --strict` and pyright, and Stripe (612 operations) passes `mypy --strict`.
 
-Try it with your own OpenAPI spec if you call an API from Python and want types without extra runtime dependencies. It works and it's well tested, but it's version 0.2 and I'm not sure it's production-ready yet. If it breaks on your spec, tell me where.
+Try it with your own OpenAPI spec if you call an API from Python and want types without extra runtime dependencies. It works and it's well tested, but it's version 0.2 and I'm not sure it's production-ready yet. If it breaks on your spec, [tell me where](https://github.com/simon-lund/openapi-burrito/issues/new).
 
 ```bash
 uv tool install openapi-burrito
