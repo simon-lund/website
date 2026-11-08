@@ -56,7 +56,9 @@ Known gaps:
 
 ## Security
 
-To prevent code injection, I cross-checked known CVEs in other generators. A generator turns text from a spec into code, so a malicious spec can end up as code in the generated client, as in [CVE-2020-15142](https://github.com/advisories/GHSA-9x4c-63pf-525f). To mitigate this in openapi-burrito, identifiers go through one sanitizer, literals go through `repr()`, and property tests throw arbitrary strings at both.
+I cross-checked the CVEs of the existing generators listed below. Most of them didn't apply. However, [CVE-2020-15142](https://github.com/advisories/GHSA-9x4c-63pf-525f) was relevant: a malicious spec can end up as code in the generated client. To mitigate this, identifiers go through one sanitizer, literals go through `repr()`, and property tests throw arbitrary strings at both.
+
+[CVE-2026-55389](https://github.com/advisories/GHSA-8359-h9fx-j6v9) and [CVE-2026-54690](https://github.com/advisories/GHSA-954p-556p-r752) were also relevant: through an external `$ref`, a spec could read local files and URLs into the generated code. To prevent this, a `$ref` can only reach files inside the spec's folder, unless you pass `--allow-external-refs`.
 
 ## Other generators
 
