@@ -3,10 +3,11 @@ title: 'openapi-burrito: openapi-typescript, but for Python'
 description: 'A generator that turns an OpenAPI spec into a small, typed Python client. You call endpoints by their path, and the only dependency is httpx.'
 pubDate: 'Nov 08 2026'
 tags: ['Python', 'API Design']
-draft: true
 ---
 
 At the start of this year I was building a client for [ArtifactsMMO](https://artifactsmmo.com), a game you play through its API. I wanted a generated client, but a lightweight one. In TypeScript, [openapi-typescript and openapi-fetch](https://openapi-ts.dev/) do exactly that, and I wanted the same for Python.
+
+I wasn't able to finish openapi-burrito right when I started, because I got busy. However, I've now taken the time to finish it, with the help of AI (Claude Code).
 
 ## What it does
 
@@ -36,11 +37,9 @@ client.GET("/pet/{petId}", { params: { path: { petId: 1 } } })
 
 In Python it's just `pet_id=1`. The client knows whether each argument belongs in the path, query, header or cookie. Names become snake_case on your side, and the client sends the API's own names: `include_owner=True` goes out as `includeOwner=true`. Python also has both sync and async HTTP, so you can generate either client, or both, from the same spec.
 
-## Finishing it
+## Security
 
-Then I got busy with other things and only worked on it now and then. I've now finished it with the help of AI (Claude Code).
-
-A code generator turns text from a spec into code, so it can be an injection risk. I cross-checked known CVEs in other generators so I wouldn't repeat their mistakes, for example [CVE-2020-15142](https://github.com/advisories/GHSA-9x4c-63pf-525f), where a malicious spec could inject code into the generated client. Identifiers go through one sanitizer, literals through `repr()`, and property tests throw arbitrary strings at both.
+To prevent code injection, I cross-checked known CVEs in other generators. A generator turns text from a spec into code, so a malicious spec can end up as code in the generated client, as in [CVE-2020-15142](https://github.com/advisories/GHSA-9x4c-63pf-525f). Here, identifiers go through one sanitizer, literals go through `repr()`, and property tests throw arbitrary strings at both.
 
 ## Examples
 
@@ -48,9 +47,9 @@ The repo has examples for [ArtifactsMMO](https://github.com/simon-lund/openapi-b
 
 ## Other generators
 
-- **openapi-python-client** generates model classes with (de)serialization code. That's more runtime machinery, and you call one function per operation instead of a path.
-- **openapi-generator** is Java-based, supports many languages and has heavier output.
-- **datamodel-code-generator** is great for models, but it doesn't generate a client.
+- **[openapi-python-client](https://github.com/openapi-generators/openapi-python-client)** generates model classes with (de)serialization code. That's more runtime machinery, and you call one function per operation instead of a path.
+- **[openapi-generator](https://github.com/OpenAPITools/openapi-generator)** is Java-based, supports many languages and has heavier output.
+- **[datamodel-code-generator](https://github.com/datamodel-code-generator/datamodel-code-generator)** is great for models, but it doesn't generate a client.
 
 ## Try it
 
