@@ -14,6 +14,8 @@
 		{ label: 'Writing', href: '/blog' },
 		{ label: 'Links', href: '/links' },
 		{ label: 'Now', href: '/now' },
+		// Another site, so it goes last and carries an arrow
+		{ label: 'Registry', href: 'https://ui.simon-lund.com', external: true },
 	];
 
 	let linkEls: HTMLElement[] = $state([]);
@@ -172,13 +174,19 @@
 			<a
 				bind:this={linkEls[i]}
 				href={link.href}
-				class="relative z-10 px-4 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 cursor-pointer
+				class="relative z-10 inline-flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 cursor-pointer
 					{activePath === link.href || activePath.startsWith(link.href)
 						? 'text-ink'
 						: 'text-stone hover:text-ink'}"
 				onmouseenter={() => handleMouseEnter(i)}
 			>
 				{link.label}
+				{#if link.external}
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M7 7h10v10" />
+						<path d="M7 17 17 7" />
+					</svg>
+				{/if}
 			</a>
 		{/each}
 
@@ -247,13 +255,19 @@
 				<a
 					href={link.href}
 					onclick={closeMobile}
-					class="text-2xl font-light text-ink cursor-pointer px-6 py-2 rounded-xl transition-colors duration-200
+					class="inline-flex items-center gap-2 text-2xl font-light text-ink cursor-pointer px-6 py-2 rounded-xl transition-colors duration-200
 						{activePath === link.href || activePath.startsWith(link.href)
 							? 'bg-accent-light'
 							: 'hover:bg-cream-dark'}"
 					style="font-family: var(--font-heading);"
 				>
 					{link.label}
+					{#if link.external}
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<path d="M7 7h10v10" />
+							<path d="M7 17 17 7" />
+						</svg>
+					{/if}
 				</a>
 			{/each}
 		</div>
