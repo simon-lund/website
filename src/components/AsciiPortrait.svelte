@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	// The portrait at exactly PIXEL_GRID × PIXEL_GRID, inlined so the face is in the
+	// first paint. The canvas samples this same image, so taking over changes nothing.
+	import portraitSrc from '../assets/portrait-69.png?inline';
 
 	// Pixelated portrait: the image is sampled into a grid of colored squares
 	// (downscale-with-averaging), reacts to the cursor like water, and shatters
@@ -23,7 +26,7 @@
 	let containerEl: HTMLDivElement | undefined = $state();
 	let canvasEl: HTMLCanvasElement | undefined = $state();
 
-	let loaded = $state(false);
+	let ready = $state(false); // the canvas has drawn and covers the static image
 	let exploded = $state(false);
 	let restoring = $state(false);
 	let mouseX = -1000;
@@ -59,35 +62,9 @@
 		return rapierPromise;
 	}
 
-	async function loadSource(): Promise<CanvasImageSource> {
-		// Prefer a real photo, then the small pre-rendered WebP (~9 KB, near-instant),
-		// and only fall back to the full 661 KB portrait.svg if neither is present.
-		for (const src of ['/test-portrait.png', '/portrait-small.webp']) {
-			try {
-				const img = new Image();
-				img.src = src;
-				await img.decode();
-				return img;
-			} catch (e) {
-				/* try the next candidate */
-			}
-		}
-		const res = await fetch('/portrait.svg');
-		const txt = await res.text();
-		const url = URL.createObjectURL(new Blob([txt], { type: 'image/svg+xml' }));
-		const svg = new Image();
-		svg.width = 600;
-		svg.height = 600;
-		svg.src = url;
-		await svg.decode();
-		return svg;
-	}
-
 	const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 	onMount(async () => {
-		loaded = true; // show the canvas immediately so we can animate the load
-		await new Promise((r) => requestAnimationFrame(r));
 		if (!canvasEl || !containerEl) return;
 
 		let size = containerEl.offsetWidth;
@@ -115,45 +92,10 @@
 		const gridLen = PIXEL_GRID * PIXEL_GRID;
 		loadRapier();
 
-		// --- Loading flourish: a warm pixel shimmer that resolves into the portrait ---
-		const cssVars = getComputedStyle(document.documentElement);
-		const hexRgb = (v, fb) => {
-			const m = v.trim().match(/^#?([0-9a-fA-F]{6})$/);
-			if (!m) return fb;
-			const n = parseInt(m[1], 16);
-			return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-		};
-		const cA = hexRgb(cssVars.getPropertyValue('--color-cream-dark'), [240, 235, 228]);
-		const cB = hexRgb(cssVars.getPropertyValue('--color-accent'), [192, 127, 82]);
-		// A single soft, slow diagonal sheen sweeping across the cream-dark base.
-		const baseStr = `rgb(${cA[0]},${cA[1]},${cA[2]})`;
-		const peakStr = `rgb(${(cA[0] + (cB[0] - cA[0]) * 0.28) | 0},${(cA[1] + (cB[1] - cA[1]) * 0.28) | 0},${(cA[2] + (cB[2] - cA[2]) * 0.28) | 0})`;
-		function fillShimmer(t) {
-			if (!ctx) return;
-			const center = ((t * 0.0005) % 1.3) - 0.15;
-			const g = ctx.createLinearGradient(0, 0, size, size);
-			const cl = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
-			g.addColorStop(0, baseStr);
-			let prev = 0;
-			for (const [pos, col] of [[center - 0.26, baseStr], [center, peakStr], [center + 0.26, baseStr]]) {
-				const s = Math.min(1, Math.max(prev + 0.0001, cl(pos)));
-				g.addColorStop(s, col);
-				prev = s;
-			}
-			g.addColorStop(1, baseStr);
-			ctx.fillStyle = g;
-			ctx.fillRect(0, 0, size, size);
-		}
-
-		let phase = 'loading';
-		function drawShimmer(t) {
-			fillShimmer(t);
-			if (phase === 'loading') requestAnimationFrame(drawShimmer);
-		}
-		requestAnimationFrame(drawShimmer);
-
-		// Load + sample the image (the slow part the shimmer is covering).
-		const sourceImg = await loadSource();
+		// Sample the inlined image; at PIXEL_GRID × PIXEL_GRID this copies it pixel for pixel.
+		const sourceImg = new Image();
+		sourceImg.src = portraitSrc;
+		await sourceImg.decode();
 		const small = document.createElement('canvas');
 		small.width = PIXEL_GRID;
 		small.height = PIXEL_GRID;
@@ -170,34 +112,6 @@
 		}
 		const pixDx = new Float32Array(gridLen);
 		const pixDy = new Float32Array(gridLen);
-
-		phase = 'ready';
-
-		// Reveal: a diagonal wave resolves the shimmer into the real pixels.
-		await new Promise((done) => {
-			const start = performance.now();
-			const DUR = 700;
-			const span = 2 * (PIXEL_GRID - 1);
-			function reveal(now) {
-				if (!ctx) { done(); return; }
-				const p = Math.min(1, (now - start) / DUR);
-				const front = p * (span + 10);
-				const cell = size / PIXEL_GRID;
-				fillShimmer(now);
-				for (let gy = 0; gy < PIXEL_GRID; gy++) {
-					for (let gx = 0; gx < PIXEL_GRID; gx++) {
-						if (gx + gy >= front - 4) continue;
-						const col = colorStr[gy * PIXEL_GRID + gx];
-						if (!col) continue;
-						ctx.fillStyle = col;
-						ctx.fillRect(gx * cell, gy * cell, cell + 0.6, cell + 0.6);
-					}
-				}
-				if (p < 1) requestAnimationFrame(reveal);
-				else done();
-			}
-			requestAnimationFrame(reveal);
-		});
 
 		let renderActive = false;
 		function render() {
@@ -248,6 +162,7 @@
 			if (!renderActive && !exploded && !restoring) { renderActive = true; render(); }
 		};
 		render();
+		ready = true;
 
 		async function explode() {
 			if (exploded || !canvasEl) return;
@@ -503,13 +418,14 @@
 <div class="relative">
 	<div
 		bind:this={containerEl}
-		class="select-none w-full md:max-w-lg aspect-square touch-none"
+		class="relative select-none w-full md:max-w-lg aspect-square touch-none"
 		onmousemove={handleMouseMove}
 		onmouseleave={handleLeave}
 	>
-		{#if loaded}
-			<canvas bind:this={canvasEl} class="w-full h-full rounded-lg" style="cursor:pointer;"></canvas>
+		{#if !ready}
+			<img src={portraitSrc} alt="" class="absolute inset-0 w-full h-full rounded-lg" style="image-rendering: pixelated;" />
 		{/if}
+		<canvas bind:this={canvasEl} class="relative w-full h-full rounded-lg" style="cursor:pointer;"></canvas>
 	</div>
 	{#if exploded && !restoring}
 		<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
