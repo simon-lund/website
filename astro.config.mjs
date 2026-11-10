@@ -6,6 +6,7 @@ import { defineConfig, fontProviders } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { toString } from 'mdast-util-to-string';
+import { existsSync, readFileSync } from 'node:fs';
 
 // Remark plugin: count words in a post and expose "N min read" on its frontmatter.
 function remarkReadingTime() {
@@ -16,10 +17,35 @@ function remarkReadingTime() {
 	};
 }
 
+// Pages that ask not to be indexed (drafts, scheduled posts, the unlisted
+// /work/ portfolio) stay out of the sitemap. Each page's robots tag is read
+// once it's built; this must sit before sitemap() so it runs first.
+const noindexPaths = new Set();
+const collectNoindex = {
+	name: 'collect-noindex',
+	hooks: {
+		'astro:build:done': ({ dir, pages }) => {
+			for (const { pathname } of pages) {
+				const file = new URL(`${pathname}index.html`, dir);
+				if (!existsSync(file)) continue; // 404.html and other non-directory pages
+				if (/<meta name="robots" content="noindex/.test(readFileSync(file, 'utf8'))) {
+					noindexPaths.add(`/${pathname}`);
+				}
+			}
+		},
+	},
+};
+
 export default defineConfig({
 	site: 'https://simon-lund.com',
-	// Unlisted pages under /work/ stay out of the sitemap.
-	integrations: [mdx(), sitemap({ filter: (page) => !page.includes('/work/') }), svelte()],
+	integrations: [
+		mdx(),
+		collectNoindex,
+		sitemap({
+			filter: (page) => !page.includes('/work/') && !noindexPaths.has(new URL(page).pathname),
+		}),
+		svelte(),
+	],
 	vite: {
 		plugins: [tailwindcss()],
 	},

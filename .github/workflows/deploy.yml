@@ -3,6 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # A scheduled post goes live with the first build on or after its pubDate.
+  # Daily, so a run GitHub delays or drops costs a day rather than a week.
+  # 05:17 UTC: early morning in Europe, off the hour when GitHub is busiest.
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read

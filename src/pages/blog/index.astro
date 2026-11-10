@@ -3,9 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ListItem from '../../components/ListItem.astro';
 import FilterableList from '../../components/FilterableList.svelte';
-import { getBlogUrl } from '../../lib/blog';
+import { getBlogUrl, postStatus } from '../../lib/blog';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+const posts = (await getCollection('blog', ({ data }) => postStatus(data) === 'published')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 

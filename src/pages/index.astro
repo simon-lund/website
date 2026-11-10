@@ -4,9 +4,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroText from '../components/HeroText.svelte';
 import ListItem from '../components/ListItem.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
-import { getBlogUrl } from '../lib/blog';
+import { getBlogUrl, postStatus } from '../lib/blog';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
+const posts = (await getCollection('blog', ({ data }) => postStatus(data) === 'published'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.slice(0, 3);
 
